@@ -494,16 +494,6 @@ function startChoice(id) {
   const showOptions = () => {
     const opts = visibleOptions(c);
     if (!opts.length) { stepRunner(); return; }
-    if (sanPips() <= 2 && !c.noAuto) {   // he has already answered.
-      const o = opts[0];
-      pushBeats([
-        N('He has already answered.'),
-        { t: 'do', fn: () => o.apply(S) },
-        ...(o.after || []),
-      ]);
-      stepRunner();
-      return;
-    }
     choicePanel = { id, c, opts };
     scene = new ChoiceScene();
   };
