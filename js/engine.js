@@ -896,13 +896,8 @@ function startRun(skip) {
   Object.keys(faceOverride).forEach(k => delete faceOverride[k]);
   GFX.envCache = {};
   skipMode = !!skip;
-  if (!SAVE.seenIntro) {   // set AFTER the prologue completes, never before (3.14)
-    startDay(0);
-  } else {
-    // from run two the prologue collapses to a 2-second card
-    S.promised = true;
-    runBeats([{ t: 'card', title: 'TASHKENT · €920', sub: 'you promised' }], () => startDay(1));
-  }
+  // every run starts with the Sunday before: the reel, the bar, the promise (Anna's ruling)
+  startDay(0);
 }
 let priceFlash = 0;   // the ticker's up-arrow animates once per day (3.13)
 function startDay(d) {

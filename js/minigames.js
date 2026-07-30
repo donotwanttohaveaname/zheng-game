@@ -139,11 +139,24 @@ MINIGAMES.SORTING_HELL = {
       ['PAPER', 'P'], ['CARD', 'B'], ['GLASS', 'Z'], ['METAL', 'T'],
       ['PLASTIC', 'A'], ['BIO', 'G'], ['MIXED', 'S'], ['?', 'M'],
     ];
+    // real Helsinki logic: the '?' bin is the collection point, and it is almost never the answer
     this.waves = [
       [['banana peel', 'BIO'], ['newspaper', 'PAPER'], ['wine bottle', 'GLASS']],
-      [['a thermal receipt', '?'], ['a tea bag', '?'], ['a "compostable" fork', '?']],
-      [['yoghurt lid', 'PLASTIC'], ['envelope, plastic window', 'PAPER'], ['one Kinu hairball', '?'], ['a battery', 'MIXED']],
+      [['a thermal receipt', 'MIXED'], ['a tea bag', 'BIO'], ['a "compostable" fork', 'MIXED']],
+      [['yoghurt lid', 'PLASTIC'], ['envelope, plastic window', 'PAPER'], ['one Kinu hairball', 'BIO'], ['a battery', '?']],
     ];
+    this.hints = {
+      'banana peel': 'it was alive recently. that is the whole test.',
+      'newspaper': 'dry, printed, proud.',
+      'wine bottle': 'glass is glass. no cap, no excuses.',
+      'a thermal receipt': 'shiny paper is not paper. it burns.',
+      'a tea bag': 'wet and organic. the bag rots too.',
+      'a "compostable" fork': 'the quotes are load-bearing. it burns.',
+      'yoghurt lid': 'rinsed(ish) plastic is plastic.',
+      'envelope, plastic window': 'the window is allowed. Finland forgives the window.',
+      'one Kinu hairball': 'Kinu made it. it is organic.',
+      'a battery': 'never a bin. the special place by the door.',
+    };
     this.wave = 0; this.idx = 0; this.itemY = MG_TOP + 20;
     this.wrong = 0; this.toast = null; this.toastT = 0; this.hintT = 0; this.hinted = {};
   },
@@ -218,10 +231,10 @@ MINIGAMES.SORTING_HELL = {
       drawTextCenter(ctx, it[0], 90, Math.round(this.itemY), PAL20.W);
       ctx.fillStyle = PAL20.C; ctx.fillRect(86, Math.round(this.itemY) + 10, 8, 8);
       if (this.hintT > 0) {
-        ctx.fillStyle = PAL20.D; ctx.fillRect(30, 130, 120, 34);
-        ctx.strokeStyle = PAL20.A; ctx.strokeRect(30.5, 130.5, 119, 33);
-        drawTextCenter(ctx, 'think about', 90, 138, PAL20.P);
-        drawTextCenter(ctx, 'what it is MADE of', 90, 148, PAL20.P);
+        ctx.fillStyle = PAL20.D; ctx.fillRect(14, 130, 152, 34);
+        ctx.strokeStyle = PAL20.A; ctx.strokeRect(14.5, 130.5, 151, 33);
+        wrapText(this.hints[it[0]] || 'think about what it is made of', 22)
+          .slice(0, 2).forEach((l, i) => drawTextCenter(ctx, l, 90, 138 + i * 10, PAL20.P));
       }
     }
     drawText(ctx, 'wrong: ' + this.wrong, 6, 228, PAL20.T);
