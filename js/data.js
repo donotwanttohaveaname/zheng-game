@@ -56,7 +56,10 @@ const SFXB = (id, pitch) => ({ t: 'sfx', id, pitch });
 /* Kinu's daily vomit + the clean-up. Every day. Non-negotiable.
    Unless she lives at Anna's now, in which case the 15 seconds come back
    and it feels awful. */
+/* where Kinu's week actually happens: decal, narration and clean-up all agree */
+const VOMIT_ART = [null, 'laptop_puke', 'boots_ruined', 'kitchen', 'apartment_hot', 'dinner', 'apartment_hot', 'ceiling'];
 const VOMIT_DAY = (day, size, lines) => [{ t: 'if', cond: s => s.kinu >= 1, then: [
+  { t: 'art', img: VOMIT_ART[day] },
   SFXB('S_VOMIT_WARN'), { t: 'pause', s: 0.6 },
   SFXB('S_VOMIT', 1 + (day - 1) * 0.18), { t: 'decal', size: size || Math.min(5, day) },
   ...(lines || []),

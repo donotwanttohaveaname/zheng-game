@@ -558,7 +558,7 @@ class ChoiceScene {
 class GameScene {
   constructor(id) {
     this.id = id; this.mg = MINIGAMES[id];
-    this.mg.init({ day: S.day, state: S });
+    this.mg.init({ day: S.day, state: S, bg: currentArt });
     this.intro = 1.2;
   }
   update(dt, input) {

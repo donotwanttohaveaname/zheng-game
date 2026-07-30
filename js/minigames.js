@@ -33,7 +33,7 @@ MINIGAMES.CLEAN_UP = {
       ['kitchen', 'the tote bag. on the leek.'], ['apartment', 'the wifi router'],
       ['dinner', 'the exact centre of the table'], ['apartment', 'the good jacket'],
       ['ceiling', 'the ceiling. somehow.']][Math.min(7, cfg.day)];
-    this.bg = SPOT[0]; this.caption = SPOT[1];
+    this.bg = cfg.bg || SPOT[0]; this.caption = SPOT[1];   // clean up where it landed, not somewhere else
     const n = 1 + (cfg.day >= 4 ? 1 : 0) + (cfg.day >= 7 ? 1 : 0);
     this.dur = 9 + 7 * n;   // enough time for every puddle. it is tedious, not unfair.
     this.puddles = [];
@@ -567,12 +567,18 @@ MINIGAMES.SLACK_STORM = {
 /* ---- 7. PERFORMANCE REVIEW: the words come back on Sunday, verbatim ---- */
 MINIGAMES.PERFORMANCE_REVIEW = {
   init() {
-    this.dur = 12; this.t = 0; this.done = false;
-    const words = ['synergy', 'obviously', 'hydrated', 'sorry', 'upskilling', 'ownership', 'fine', 'no'];
-    this.words = words.map((w, i) => ({
-      w, x: 10 + (i % 2) * 85, y: MG_TOP + 30 + i * 28,
-      vx: (i % 2 ? -1 : 1) * (8 + (i % 3) * 5), picked: false,
+    this.dur = 18; this.t = 0; this.done = false;
+    // the form has four blanks. the words drift past like they always do.
+    const bank = [
+      'radical ownership', 'crying, but agile', 'the calendar',
+      'synergy (unclear)', 'being hydrated', 'my inner Sandal',
+      'circling back', 'vibes, aligned', 'sorry', 'no',
+    ];
+    this.words = bank.map((w, i) => ({
+      w, x: 10 + ((i * 67) % 110), y: MG_TOP + 22 + i * 17,
+      vx: (i % 2 ? -1 : 1) * (10 + (i * 7) % 14), picked: false,
     }));
+    this.slots = ['DID:', 'VIA:', 'SORRY FOR:', 'NEXT YEAR:'];
     this.picked = [];
   },
   update(dt, input) {
@@ -580,15 +586,18 @@ MINIGAMES.PERFORMANCE_REVIEW = {
     this.words.forEach(w => {
       if (w.picked) return;
       w.x += w.vx * dt;
-      if (w.x < 4 || w.x > 176 - w.w.length * 6) w.vx *= -1;
+      const pw = w.w.length * 6;
+      if (w.x > 180) w.x = -pw;
+      if (w.x < -pw) w.x = 180;
     });
     input.taps.forEach(tp => this.words.forEach(w => {
       if (!w.picked && this.picked.length < 4 &&
-        tp.x >= w.x - 6 && tp.x <= w.x + w.w.length * 6 + 6 && tp.y >= w.y - 9 && tp.y <= w.y + 16) {
+        tp.x >= w.x - 6 && tp.x <= w.x + w.w.length * 6 + 6 && tp.y >= w.y - 8 && tp.y <= w.y + 14) {
         w.picked = true; this.picked.push(w.w); AUDIO.sfx('S_CHOICE_CONFIRM');
       }
     }));
-    if (this.picked.length >= 4 || this.t >= this.dur) this.done = true;
+    if (this.t >= this.dur) { while (this.picked.length < 4) this.picked.push('fine'); }
+    if (this.picked.length >= 4) this.done = true;
   },
   draw(ctx) {
     mgFrame(ctx, 'PERFORMANCE REVIEW', this.t, this.dur);
@@ -597,9 +606,15 @@ MINIGAMES.PERFORMANCE_REVIEW = {
       const fade = 0.5 + 0.5 * Math.sin(this.t * 2 + w.y);
       drawText(ctx, w.w, Math.round(w.x), Math.round(w.y), fade > 0.5 ? PAL20.P : PAL20.T);
     });
-    drawText(ctx, 'YOUR SELF-ASSESSMENT:', 8, 262, PAL20.T);
-    drawText(ctx, this.picked.join(' ') || '...', 8, 274, PAL20.A);
-    drawTextCenter(ctx, 'grab four words. for the form.', 90, 306, PAL20.T);
+    ctx.fillStyle = PAL20.K; ctx.fillRect(0, 226, 180, 80);
+    ctx.fillStyle = PAL20.D; ctx.fillRect(4, 228, 172, 1);
+    this.slots.forEach((label, i) => {
+      const y = 236 + i * 15;
+      drawText(ctx, label, 8, y, PAL20.T);
+      const filled = this.picked[i];
+      drawText(ctx, filled || '______', 8 + (label.length + 1) * 6, y, filled ? PAL20.A : PAL20.S);
+    });
+    drawTextCenter(ctx, 'grab four for the form.', 90, 300, PAL20.T);
   },
   result() { return { win: true, picked: this.picked }; },
 };
@@ -849,20 +864,52 @@ const MG_AFTER = {
   PERFORMANCE_REVIEW(res, s) {
     s.reviewWords = res.picked;
     const out = [];
-    if (res.picked.includes('no')) {
+    out.push({ t: 'say', who: 'NARRATOR', dyn: s => {
+      const p = s.reviewWords;
+      return 'The form now reads: "I demonstrated ' + p[0] + ' while leveraging ' + p[1] +
+        '. I apologise for ' + p[2] + '. Next year: ' + p[3] + '."';
+    } });
+    const has = w => res.picked.some(p => p.includes(w));
+    if (has('no')) {
       bump('job', -2); bump('sanity', 3);
       out.push(SAY('SANDAL', '...'));
       out.push(SAY('SANDAL', 'I\'ll put "developing".'));
     }
-    if (res.picked.includes('hydrated')) {
+    if (has('hydrated')) {
       bump('sanity', 1);
-      out.push(N('Sandal writes it down. Sandal writes it down without asking.'));
+      out.push(N('Sandal writes it down. Without asking. He underlines it twice.'));
     }
-    if (res.picked.includes('sorry')) {
+    if (has('sorry')) {
       bump('job', 1); bump('sanity', -2);
       out.push(N('It goes in the form. The form goes in the file. There is a file.'));
     }
-    if (!out.length) out.push(N('The form accepts the words. The form accepts anything.'));
+    if (has('radical ownership')) {
+      bump('job', 1); bump('sanity', -1);
+      out.push(SAY('SANDAL', "THAT'S the energy.", 'fake'));
+      out.push(N('He says it loudly enough that two other reviews pause.'));
+    }
+    if (has('inner Sandal')) {
+      bump('job', 1);
+      out.push(SAY('SANDAL', "There's an inner me?", 'fake'));
+      out.push(N('He is visibly moved. This is the worst available outcome.'));
+    }
+    if (has('crying')) {
+      bump('sanity', 1);
+      out.push(SAY('SANDAL', '"But agile" is doing a lot of work there. Love it.'));
+    }
+    if (has('calendar')) {
+      out.push(N('The calendar accepts the blame. The calendar has broad shoulders.'));
+    }
+    if (has('synergy')) {
+      out.push(N('The brackets go in the form too. Nobody asks about the brackets. Nobody ever has.'));
+    }
+    if (has('circling back')) {
+      out.push(N('The form flags it as a growth area, and also, somehow, a promise.'));
+    }
+    if (has('vibes')) {
+      out.push(N('The vibes are aligned. Nobody asks with what.'));
+    }
+    if (out.length === 1) out.push(N('The form accepts the words. The form accepts anything.'));
     return out;
   },
   DRINK_DODGE(res, s) { return []; },
