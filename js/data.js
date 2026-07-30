@@ -341,21 +341,38 @@ DAYS[1] = [
 ];
 CHOICES.WINDOW = {
   prompt: [
-    N('It is twenty six degrees and climbing. The window works perfectly. That is the problem.'),
     { t: 'art', img: 'window' },
+    { t: 'if', cond: s => !s.windowOpen, then: [
+      { t: 'say', who: 'NARRATOR', dyn: s => 'It is ' + Math.round(s.temp) + ' degrees and climbing. The window works perfectly. That is the problem.' },
+    ], else: [
+      N('The window is open. The apartment is bearable. Kinu has discovered the sill.'),
+    ] },
   ],
   options: [
-    { label: 'Open it', apply: s => { s.temp -= 8; bump('sanity', 1); s.windowOpen = true; s.windowEverOpened = true; },
+    { label: 'Open it', hide: s => s.windowOpen,
+      apply: s => { s.temp -= 8; bump('sanity', 1); s.windowOpen = true; s.windowEverOpened = true; },
       after: [
         Z("She's asleep. She's been asleep for four hours."),
         SFXB('S_WINDOW_OPEN'),
         N('Kinu opens one eye.'),
       ] },
-    { label: 'Keep it shut', apply: s => { s.temp += 2; bump('sanity', -1); },
+    { label: 'Keep it shut', hide: s => s.windowOpen,
+      apply: s => { s.temp += 2; bump('sanity', -1); },
       after: [
         Z("I'll be fine. I'm from a hot country. Sort of. My parents are."),
         SFXB('S_WINDOW_SHUT'),
         N('He is from Nanchang. It is, in fact, one of the famous furnace cities of China. This information helps him in no way whatsoever.'),
+      ] },
+    { label: 'Leave it open', hide: s => !s.windowOpen, apply: () => {},
+      after: [
+        N('Kinu, on the sill, watching the street with the stillness of a professional.'),
+        Z('Not the birds. We talked about the birds.'),
+      ] },
+    { label: 'Close it', hide: s => !s.windowOpen,
+      apply: s => { s.temp += 2; bump('sanity', -1); s.windowOpen = false; },
+      after: [
+        SFXB('S_WINDOW_SHUT'),
+        N('Kinu files a silent complaint. The heat moves back in within the hour, and unpacks.'),
       ] },
   ],
 };
@@ -458,6 +475,7 @@ DAYS[3] = [
   { t: 'card', title: 'WEDNESDAY', sub: '31°C · CAR LOAN DUE' },
   { t: 'art', img: 'apartment_hot', music: 'M_JULIUS' },
   { t: 'choice', id: 'TAROT' },
+  { t: 'choice', id: 'WINDOW' },
   SAY('JULIUS', 'So I did a thing?', 'warm'),
   N('There are seven bins.'),
   Z('There are seven bins.'),
@@ -613,6 +631,7 @@ DAYS[5] = [
   { t: 'card', title: 'FRIDAY', sub: 'PAYDAY' },
   { t: 'art', img: 'apartment_hot', music: 'M_HOME_HOT' },
   { t: 'choice', id: 'TAROT' },
+  { t: 'choice', id: 'WINDOW' },
   SFXB('S_COIN_BIG'),
   { t: 'money', delta: 900, label: 'SALARY: €900' },
   { t: 'face', who: 'ZHENG', face: 'happy' },
