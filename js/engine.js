@@ -630,7 +630,7 @@ class BookingScene {
     if (this.phase === 'booked') drawTextCenter(ctx, 'Booked.', 90, 200, PAL20.W);
     if (this.phase === 'short') {
       drawTextCenter(ctx, 'You are €' + shortfall() + ' short.', 90, 190, PAL20.R);
-      if (this.t > 1.8) drawTextCenter(ctx, 'The price goes up again on Monday.', 90, 210, PAL20.T);
+      if (this.t > 1.8) drawTextCenter(ctx, 'Monday exists.', 90, 210, PAL20.T);
     }
   }
 }
@@ -813,7 +813,7 @@ class TitleScene {
       this.galleryBtn = { x: 50, y: 256, w: 80, h: 20 };
       mgBtn(ctx, Object.assign({ label: SAVE.found.length + '/32' }, this.galleryBtn), false);
     }
-    if (AUDIO.ctx && AUDIO.ctx.state === 'suspended') drawTextCenter(ctx, 'check your side switch', 90, 300, PAL20.T);
+    if (AUDIO.ctx && AUDIO.ctx.state === 'suspended') drawTextCenter(ctx, 'no sound? check the mute switch', 90, 300, PAL20.T);
   }
 }
 

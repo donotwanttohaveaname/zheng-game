@@ -229,7 +229,7 @@ MINIGAMES.SORTING_HELL = {
       ctx.strokeStyle = PAL20.G; ctx.strokeRect(8.5, 150.5, 163, 23);
       wrapText(this.toast, 26).slice(0, 2).forEach((l, i) => drawTextCenter(ctx, l, 90, 155 + i * 9, PAL20.C));
     }
-    drawTextCenter(ctx, 'tap item = hint · arrows = more bins', 90, 306, PAL20.T);
+    drawTextCenter(ctx, 'tap the falling item for a hint', 90, 306, PAL20.T);
   },
   result() { return { win: this.wrong === 0, wrong: this.wrong }; },
 };
@@ -501,7 +501,7 @@ MINIGAMES.SLACK_STORM = {
     this.dur = 10; this.t = 0; this.done = false;
     // the noise is varied noise. the one that matters states its stakes.
     const NOISE = [
-      ['Jira', '47 updates'], ['IT', 'the printer again'], ['all-hands', 'moved to 8:15'],
+      ['Jira', '47 updates'], ['IT', 'the printer again'], ['all-hands', 'moved to 08:15'],
       ['Marketing', 'cake, kitchen 3'], ['Tuomas', '?'], ['Maria (OOO)', 'auto-reply'],
     ];
     this.pings = [];
@@ -625,7 +625,7 @@ MINIGAMES.DRINK_DODGE = {
     this.dur = 36; this.t = 0; this.done = false;
     this.state = cfg.state;
     this.rounds = [
-      ['SUSAN', "okay but this one's on me.  (it is not on her.)", null],
+      ['SUSAN', "okay rounds. we're doing rounds. it's fair because i said fair.", null],
       ['JOY', "ville said i'm intense. am i intense. don't answer. one more first.", 'saga'],
       ['SUSAN', "zheng. zheng. it's eighteen euros. it's eighteen euros.", null],
       ['JOY', 'okay so aleksi is OVER. ville is now. keep up. shots?', 'saga'],
@@ -729,10 +729,28 @@ MINIGAMES.DEFENESTRATION = {
 const MG_AFTER = {
   CLEAN_UP(res, s) {
     if (res.wrongBin) bump('love', -1);
-    if (res.win) return [];   // the stain is gone. nothing else happens. that is the reward.
+    if (res.win && !res.wrongBin) {
+      bump('love', 1);   // done right, every time, quietly: Julius notices
+      const NOTICED = [
+        'He says nothing. The floor says it for him.',
+        'From the other room, unprompted: "thank you." He saw nothing. He knows everything.',
+        'The towel goes back on its hook. Domestic credit accrues, invisibly.',
+        'Julius walks through later, pauses at the spot, and does not know why he feels good.',
+        'The bin closes with the click of a job done properly.',
+        'Somewhere in the apartment, trust compounds at a very small interest rate.',
+        'Nothing marks the spot. That is the point of it.',
+      ];
+      return [N(NOTICED[(s.day - 1) % NOTICED.length])];
+    }
+    if (res.win) return [];   // cleaned, but the wrong bin hangs in the air
     s.smell++; s.stains.push({ day: s.day });
     GFX.envCache = {};        // the apartment redraws with the stain, permanently
-    const out = [N('The stain sets. It has joined the apartment now.')];
+    const STAIN = [
+      'The stain sets. It has joined the apartment now.',
+      'The stain dries into the floor with the confidence of a permanent resident.',
+      'Another stain sets. The floor is becoming a record of the week.',
+    ];
+    const out = [N(STAIN[(s.stains.length) % 3])];
     if (s.smell === 2) {
       out.push(SAY('JULIUS', "Does it smell in here? It doesn't. Does it?", 'curious'));
       out.push({ t: 'do', fn: () => bump('love', -1) });
@@ -827,7 +845,14 @@ const MG_AFTER = {
           : [N('He sends it at 02:10 with the wrong file attached. The right file is called "final_v2_ACTUAL".')]),
       ];
     }
-    if (res.win) { bump('job', 1); return [Z("Done. It's done. It's not good but it's done.")]; }
+    if (res.win) {
+      bump('job', 1);
+      if (res.kinuCalmed) { bump('kinu', 1); return [
+        Z("Done. It's done. It's not good but it's done."),
+        N('Kinu, cool and horizontal, files the evening under acceptable.'),
+      ]; }
+      return [Z("Done. It's done. It's not good but it's done.")];
+    }
     bump('job', -1);
     return [
       N('He sends it at 02:10 with the wrong file attached. The right file is called "final_v2_ACTUAL".'),
@@ -853,8 +878,8 @@ const MG_AFTER = {
   SLACK_STORM(res, s) {
     s.unread += res.swiped;
     const out = [];
-    if (res.sandalTapped) out.push(N('Four hundred words on ownership. The word "ownership" appears nine times. It is not defined once.'));
-    if (res.win) out.push(Z("August. Right. That's the one. That's the whole thing."));
+    if (res.sandalTapped) out.push(N('He reads the ownership essay twice. Neither pass produces a definition.'));
+    if (res.win) { bump('sanity', 1); out.push(Z("Holiday: approved. That's the one. That's the whole thing.")); out.push(N('August exists again. Somewhere to put the mind.')); }
     else {
       s.f.holidayApproved = false; bump('job', -1);
       out.push(N('The request expires quietly on Friday. Nobody tells him. That is how it works, and it works very well.'));
@@ -891,7 +916,7 @@ const MG_AFTER = {
     if (has('inner Sandal')) {
       bump('job', 1);
       out.push(SAY('SANDAL', "There's an inner me?", 'fake'));
-      out.push(N('He is visibly moved. This is the worst available outcome.'));
+      out.push(N('He is visibly moved. There was no worse thing to have typed.'));
     }
     if (has('crying')) {
       bump('sanity', 1);
@@ -901,13 +926,13 @@ const MG_AFTER = {
       out.push(N('The calendar accepts the blame. The calendar has broad shoulders.'));
     }
     if (has('synergy')) {
-      out.push(N('The brackets go in the form too. Nobody asks about the brackets. Nobody ever has.'));
+      out.push(N('The brackets go in the form too. The brackets have never once been questioned.'));
     }
     if (has('circling back')) {
       out.push(N('The form flags it as a growth area, and also, somehow, a promise.'));
     }
     if (has('vibes')) {
-      out.push(N('The vibes are aligned. Nobody asks with what.'));
+      out.push(N('The vibes are aligned. With what, the form does not say.'));
     }
     if (out.length === 1) out.push(N('The form accepts the words. The form accepts anything.'));
     return out;
@@ -916,6 +941,7 @@ const MG_AFTER = {
   DEFENESTRATION(res, s) {
     if (res.win) return [
       { t: 'art', img: 'window_caught' },
+      { t: 'do', fn: s => bump('kinu', 1) },
       Z('No. No. No.', 'alarm'),
       N('Kinu, scruffed, dangling, entirely unbothered.'),
       N('She is not sorry. She has never been sorry. Sorry is not available to her.'),
