@@ -19,7 +19,7 @@ function resetState() {
     fanTaps: 0, fanMain: null, booked: false, bookedPrice: null,
     guilt: 0, overtime: 0, sold: [],
     smell: 0, stains: [], mattBond: 0, juliusTrust: null,
-    fanKinu: false, carSold: false, promised: false,
+    fanKinu: false, promised: false,
     sagaHeard: 0, tarotCount: 0, unread: 0, reviewWords: [],
     borrowed: {},
     f: {

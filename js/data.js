@@ -681,7 +681,7 @@ CHOICES.TORI = {
         N('He notices within the hour. He does not say anything. He just stands where it was for a while, and then goes to bed early.'),
         { t: 'if', cond: s => s.sold.length < 2, then: [{ t: 'choice', id: 'TORI' }] },
       ] },
-    { label: '3 more items', hide: s => s.sold.length === 0 || s.sold.includes('car'),
+    { label: '3 more items', hide: s => s.sold.length === 0,
       apply: () => {}, after: [{ t: 'choice', id: 'TORI_MORE' }] },
     { label: 'Sell nothing', apply: () => {}, after: [N('Everything stays. Everything always stays.')] },
   ],
@@ -690,11 +690,12 @@ CHOICES.TORI = {
 CHOICES.TORI_MORE = {
   prompt: [N('Further down the listings page. Where the strange things live.')],
   options: [
-    { label: 'The car (+€2,400)', apply: s => { s.money += 2400; s.sold.push('car'); s.carSold = true; },
+    { label: 'The car (+€2,400)', hide: s => s.f.triedSellCar, apply: s => { s.f.triedSellCar = true; },
       after: [
-        SFXB('S_COIN_BIG'),
-        N('The loan does not stop. He still owes €225 a month for a car he does not have.'),
-        N('And on Sunday there will be no way to the airport.'),
+        N('He writes the listing. Good condition. One owner. Reluctant sale.'),
+        N('He gets as far as the photograph. In the photograph the car is looking at him.'),
+        Z('No.'),
+        N('Some money is not money. The car has always known this about him.'),
       ] },
     { label: "His mother's rug", apply: () => {},
       after: [N('He looks at the listing draft for a while. He closes it. Some money is not money.')] },
@@ -1036,10 +1037,6 @@ function arrivalBeats(s) {
     b.push(SAY('JOY', 'susan he said that'));
     b.push(SAY('SUSAN', "I'm CONFIRMING"));
     b.push(N('Susan pays for the taxi. She will bring this up on Thursday, and on Friday, and once in October.'));
-  }
-  if (s.carSold) {
-    b.push(N('He got to the airport at 04:40 in a black Skoda driven by a woman in black who did not once ask why he was selling a car in July.'));
-    b.push(N('At the drop-off she said one thing: "The Fool. I told you." Then she drove away before he could answer.'));
   }
   if (!SA) {
     b.push(N('The meter says a number. Then a slightly different number. Then the first one again.'));
