@@ -62,6 +62,12 @@ function dispatchTap(p) {
 /* ---------- loop ---------- */
 document.addEventListener('visibilitychange', () => { if (!document.hidden) AUDIO.kick(); });
 buildGfx();
+// build stamp, read from the cache-bust so it cannot lie about what actually loaded
+const GAME_V = (() => {
+  const s = document.querySelector('script[src*="main.js"]');
+  const mv = s && s.src.match(/v=(\d+)/);
+  return mv ? 'v' + mv[1] : 'v?';
+})();
 scene = new TitleScene();
 let last = performance.now();
 function frame(now) {
@@ -72,6 +78,7 @@ function frame(now) {
   if (scene) {
     scene.update(dt, input);
     if (scene) scene.draw(ctx);
+    drawText(ctx, GAME_V, 180 - GAME_V.length * 6 - 2, 313, PAL20.D);
   }
   input.taps.length = 0;
   input.swipes.length = 0;
