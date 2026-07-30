@@ -860,7 +860,7 @@ const MG_AFTER = {
     ];
   },
   CO_OP(res, s) {
-    const chunks = Math.floor(res.seconds / 5);
+    const chunks = Math.min(2, Math.floor(res.seconds / 5));
     bump('sanity', chunks); bump('job', -chunks);
     s.mattBond += chunks;
     if (res.win) {
@@ -879,7 +879,7 @@ const MG_AFTER = {
     s.unread += res.swiped;
     const out = [];
     if (res.sandalTapped) out.push(N('He reads the ownership essay twice. Neither pass produces a definition.'));
-    if (res.win) { bump('sanity', 1); out.push(Z("Holiday: approved. That's the one. That's the whole thing.")); out.push(N('August exists again. Somewhere to put the mind.')); }
+    if (res.win) { bump('sanity', 1); bump('job', 1); out.push(Z("Holiday: approved. That's the one. That's the whole thing.")); out.push(N('August exists again. Somewhere to put the mind.')); }
     else {
       s.f.holidayApproved = false; bump('job', -1);
       out.push(N('The request expires quietly on Friday. Nobody tells him. That is how it works, and it works very well.'));

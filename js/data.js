@@ -273,7 +273,7 @@ CHOICES.WORK_CALL = {
          'Zheng. Circling back on the circle-back.'][s.day % 5] },
   ],
   options: [
-    { label: 'Answer it', apply: s => { s.callsToday = (s.callsToday || 0) + 1; bump('sanity', -1); },
+    { label: 'Answer it', apply: s => { if ((s.callsToday || 0) === 0) bump('job', 1); s.callsToday = (s.callsToday || 0) + 1; bump('sanity', -1); },
       after: [{ t: 'say', who: 'NARRATOR', dyn: s => [
         'It is not quick. It is never quick. Nothing aligns, and the not-aligning takes twenty minutes.',
         'The call is nineteen minutes about a slide that does not exist yet and one minute of "anyway".',
@@ -581,6 +581,7 @@ CHOICES.OVERTIME = {
           N('The office empties around him, desk by desk, like a tide going out.'),
         ] },
         { t: 'if', cond: s => s.overtime === 3, then: [
+          { t: 'do', fn: s => bump('job', 1) },
           N('The cleaner comes through at nine. They nod at each other like colleagues, which by now they are.'),
           SAY('SANDAL', "Go home, Zheng. Even I'm going home."),
           N('Sandal leaves. Zheng stays another forty minutes, out of something that is not loyalty.'),
@@ -966,6 +967,11 @@ CHOICES.SANDAL7 = {
     ] },
   ],
   options: [
+    { label: 'Hang up.', apply: () => {},
+      after: [
+        N('He hangs up. It rings again, twice, and gives up.'),
+        N('Monday will still exist. He has decided not to think about it from here.'),
+      ] },
     { label: '"I\'m resigning."', apply: s => { s.job = 0; bump('sanity', 4); },
       after: [
         SAY('SANDAL', "Let's circle back Monday."),
@@ -974,7 +980,7 @@ CHOICES.SANDAL7 = {
         Z('...'),
         SAY('SANDAL', 'Great chat.'),
       ] },
-    { label: 'Apologise for the week.', require: s => Math.floor(s.sanity) > 4, apply: s => { bump('job', 2); bump('sanity', -3); },
+    { label: 'Apologise for the week.', require: s => Math.floor(s.sanity) > 2, apply: s => { bump('job', 2); bump('sanity', -2); },
       after: [
         Z("I know this week hasn't been my strongest."),
         SAY('SANDAL', "Hey. Hey. We've all got stuff. Yeah? We've all got stuff."),

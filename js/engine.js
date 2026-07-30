@@ -33,6 +33,7 @@ function resetState() {
 resetState();
 const CAPS = { job: 5, love: 5, friends: 5, sanity: 10, kinu: 3 };
 function bump(k, n) {
+  if (k === 'sanity' && n > 0 && S.f.cracked) n = Math.ceil(n / 2);   // the crack stays
   const before = S[k];
   if (k === 'friends') {   // friends is derived: base minus decay (v3.8)
     S.friendsBase = clamp(S.friendsBase + n, 0, 5 + 4);
@@ -40,6 +41,7 @@ function bump(k, n) {
   } else {
     S[k] = clamp(S[k] + n, 0, CAPS[k] ?? 1e9);
   }
+  if (k === 'sanity' && S[k] <= 0) S.f.cracked = true;
   if (S[k] < before) AUDIO.sfx(k === 'sanity' ? 'S_SANITY_CRACK' : 'S_PIP_LOSS', { pitch: 1 - ((CAPS[k] || 5) - S[k]) * 0.06 });
   if (k === 'sanity' && S[k] > before) AUDIO.sfx('S_SANITY_UP');
   if (k === 'sanity' && Math.floor(S[k]) < 4) AUDIO.sanityLow(true);
@@ -639,6 +641,9 @@ class BookingScene {
 class JudgeScene {
   constructor() {
     AUDIO.music(null);
+    // the night before the 06:00 flight: nobody sleeps well next to a packed week
+    const nightDrain = 0.5 + 0.35 * S.stains.length + (S.f.cracked ? 1 : 0);
+    S.sanity = clamp(S.sanity - nightDrain, 0, 10);
     this.t = 0; this.revealed = 0;
     this.flags = [
       ['money', S.booked], ['job', S.job >= 1], ['kinu', S.kinu >= 1],
@@ -831,8 +836,11 @@ function applyDailyDrain(d) {
   drain += (S.kinu <= 2) ? 0.5 : 0;
   drain += S.sold.includes('espresso') ? 1.0 : 0;
   drain += (S.job <= 2) ? 1.0 : 0;
+  drain += 0.35 * S.stains.length;   // living with the stains wears on him, quietly
+  // (applied below; if the float touches zero the crack stays — see bump)
   drain -= S.windowOpen ? 0.5 : 0;
   if (d > 1) S.sanity = clamp(S.sanity - Math.max(0, drain), 0, 10);
+  if (S.sanity <= 0) S.f.cracked = true;
   if (S.sanity < 4) AUDIO.sanityLow(true);
 }
 function endOfDayDecay() {
@@ -876,7 +884,7 @@ function dailySystemBeats(d) {
   if (d === 3) out.push({ t: 'if', cond: s => s.friends >= 1, then: [{ t: 'choice', id: 'JOY_WED' }] });
   if (d === 4) out.push({ t: 'if', cond: s => s.friends >= 1, then: [{ t: 'choice', id: 'JOY_THU' }] });
   // sagaHeard payout: Sunday morning, before the companion check (3.8)
-  if (d === 7) out.push({ t: 'if', cond: s => s.sagaHeard >= 6 && !s.f.sagaPaid, then: [
+  if (d === 7) out.push({ t: 'if', cond: s => s.sagaHeard >= 5 && !s.f.sagaPaid, then: [
     { t: 'do', fn: s => { s.f.sagaPaid = true; bump('friends', 2); } },
   ] });
   return out;
