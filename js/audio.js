@@ -11,17 +11,34 @@ const AUDIO = {
   _sanityLow: null,
 
   unlock() {
-    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    if (this.ctx) { this.kick(); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     this.ctx = new AC();
+    // iOS creates the context suspended even inside a gesture. resume immediately,
+    // inside the gesture, and play a silent warm-up buffer to claim the channel.
+    if (this.ctx.state !== 'running') this.ctx.resume();
     this.master = this.ctx.createGain();
     this.master.connect(this.ctx.destination);
-    this.musicGain = this.ctx.createGain(); this.musicGain.gain.value = 0.5;
+    this.musicGain = this.ctx.createGain(); this.musicGain.gain.value = 0.8;
     this.musicGain.connect(this.master);
     this.sfxGain = this.ctx.createGain();
     this.sfxGain.connect(this.master);
+    const warm = this.ctx.createBuffer(1, 1, 22050);
+    const src = this.ctx.createBufferSource();
+    src.buffer = warm; src.connect(this.master); src.start(0);
     this.setMuted(this.muted);
+  },
+  kick() {
+    // iOS suspends the context on app-switch, lock, or ringer events.
+    // resume on any gesture, and restart the current track cleanly.
+    if (!this.ctx) return;
+    if (this.ctx.state !== 'running') {
+      const m = this._music;
+      this.ctx.resume().then(() => {
+        if (m && m.id) { this._music = null; this.music(m.id, { tempo: m.tempo }); }
+      });
+    }
   },
   setMuted(m) {
     this.muted = m;

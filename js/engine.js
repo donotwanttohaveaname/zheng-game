@@ -324,10 +324,10 @@ class TalkScene {
         const id = who === 'JULIUS' && near ? 'JULIUS_UP' : who;
         if (who === 'JOY') setTimeout(() => AUDIO.blip('JOY'), 12);
         else AUDIO.blip(id);
-        AUDIO.duck(0.3, 60);
+        AUDIO.duck(0.35, 60);
       }
     } else {
-      AUDIO.duck(0.5, 200);
+      AUDIO.duck(0.8, 200);
       this.doneT += dt;
       // v3: nothing in this game ever advances on its own. every box waits for a tap.
     }

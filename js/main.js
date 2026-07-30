@@ -21,6 +21,7 @@ function toGame(e) {
 }
 canvas.addEventListener('pointerdown', e => {
   e.preventDefault();
+  AUDIO.unlock();   // pointerdown is the most reliable iOS gesture; unlock is idempotent
   const p = toGame(e);
   input.down = true; input.x = p.x; input.y = p.y;
   pStart = p; pMoved = 0; pTime = performance.now();
@@ -59,6 +60,7 @@ function dispatchTap(p) {
 }
 
 /* ---------- loop ---------- */
+document.addEventListener('visibilitychange', () => { if (!document.hidden) AUDIO.kick(); });
 buildGfx();
 scene = new TitleScene();
 let last = performance.now();

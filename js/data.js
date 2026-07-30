@@ -79,7 +79,7 @@ DAYS[0] = [
   SAY('SUSAN', "that's why it's a week. one week. sunday to sunday. you get it together, you press the button, we press ours."),
   { t: 'pause', s: 1 },
   { t: 'music', id: null },
-  SAY('JOY', "i've never been anywhere.", 'emotional'),   // the load-bearing line. no music.
+  SAY('JOY', "i haven't left my office in months.", 'emotional'),   // the load-bearing line. no music.
   { t: 'pause', s: 1.2 },
   N('Zheng looks at the number for a while.'),
   Z('Okay.'),
@@ -1108,7 +1108,7 @@ function codaBeats(s) {
   b.push(SAY('JOY', "it's fine. we'll do it next year."));
   b.push(N('Joy has said "next year" about four separate things since March.'));
   if (s.friends >= 4) {
-    b.push(SAY('JOY', "i've still never been anywhere."));
+    b.push(SAY('JOY', "i still haven't left my office."));
     b.push({ t: 'pause', s: 1.5 });
   }
   return b;
