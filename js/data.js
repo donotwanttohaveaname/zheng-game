@@ -489,7 +489,13 @@ DAYS[5] = [
   N('The dinner continues for one hour and fifty minutes.'),
   SAY('AINO', "Thank you for cooking. That's a lot of work for five people.", 'warm'),
   N('She means it. She means it every time.'),
-  { t: 'if', cond: s => s.f.juliusGone, then: [
+  { t: 'if', cond: s => s.f.juliusGone && s.love >= 2, then: [
+    N('Julius does the dishes. All of them. Slowly.'),
+    N('The last train to Tampere is at 23:41. He looks at the time once, and then he does the pans as well.'),
+    N('He misses the train. On purpose, as far as anyone can tell.'),
+    { t: 'do', fn: s => { s.f.juliusGone = false; GFX.envCache = {}; } },
+  ] },
+  { t: 'if', cond: s => s.f.juliusGone && s.love < 2, then: [
     N('Julius does the dishes. All of them. Then he takes the last train back to Tampere.'),
     N('He leaves the kitchen cleaner than the break found it.'),
   ] },
