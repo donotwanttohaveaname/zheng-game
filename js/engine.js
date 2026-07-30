@@ -494,7 +494,7 @@ function startChoice(id) {
   const showOptions = () => {
     const opts = visibleOptions(c);
     if (!opts.length) { stepRunner(); return; }
-    if (sanPips() <= 2) {   // he has already answered.
+    if (sanPips() <= 2 && !c.noAuto) {   // he has already answered.
       const o = opts[0];
       pushBeats([
         N('He has already answered.'),

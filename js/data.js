@@ -140,6 +140,7 @@ CHOICES = {};
 
 /* daily tarot: once, free, optional, one tap. never wrong, never useful. */
 CHOICES.TAROT = {
+  noAuto: true,   // the ritual always asks, even on the bad days
   prompt: [],
   options: [
     { label: 'Ask Anna to read the cards', apply: s => {
@@ -173,6 +174,7 @@ CHOICES.TAROT = {
   ],
 };
 CHOICES.TAROT_PICK = {
+  noAuto: true,
   prompt: [],
   options: [
     { label: 'The left card', apply: s => { s._tarotPick = s._tarotOffer[0]; s.tarotUsed.push(s._tarotPick[0]); },
@@ -486,7 +488,7 @@ CHOICES.TEMU = {
     SAY('JULIUS', 'Zheng.'),
   ],
   options: [
-    { label: 'Buy the case + protector. Say nothing.', apply: s => { s.money -= 2; bump('sanity', 3); s.f.temuSecret = true; s.f.packageArrives = Math.random() < 0.4; },
+    { label: 'Buy the Temu case + protector. Say nothing.', apply: s => { s.money -= 2; bump('sanity', 3); s.f.temuSecret = true; s.f.packageArrives = Math.random() < 0.4; },
       after: [
         SFXB('S_TEMU_BUY'),
         { t: 'art', img: 'dark' },

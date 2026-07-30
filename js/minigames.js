@@ -35,7 +35,7 @@ MINIGAMES.CLEAN_UP = {
       ['ceiling', 'the ceiling. somehow.']][Math.min(7, cfg.day)];
     this.bg = cfg.bg || SPOT[0]; this.caption = SPOT[1];   // clean up where it landed, not somewhere else
     const n = 1 + (cfg.day >= 4 ? 1 : 0) + (cfg.day >= 7 ? 1 : 0);
-    this.dur = 9 + 7 * n;   // enough time for every puddle. it is tedious, not unfair.
+    this.dur = 9 + 10 * n;   // enough time for every puddle. it is tedious, not unfair.
     this.puddles = [];
     for (let i = 0; i < n; i++) this.puddles.push({
       x: 30 + ((cfg.day * 37 + i * 61) % 122), y: MG_TOP + 40 + ((cfg.day * 53 + i * 47) % 74),
@@ -55,6 +55,7 @@ MINIGAMES.CLEAN_UP = {
   cur() { return this.puddles[this.pi]; },
   update(dt, input) {
     this.t += dt;
+    if (this.binToastT > 0) this.binToastT -= dt;   // real time, not render frames
     if (this.pickT > 0) { this.pickT -= dt; return; }   // the animation. it is not fast.
     const p = this.cur();
     input.taps.forEach(tp => {
@@ -62,6 +63,7 @@ MINIGAMES.CLEAN_UP = {
       if (inRect(tp, this.leaveBtn)) { this.left = true; this.done = true; AUDIO.sfx('S_PIP_LOSS'); return; }
       if (this.phase === 'towel' && inRect(tp, this.towel)) { this.phase = 'wipe'; this.pickT = 0.9; AUDIO.sfx('S_SWIPE_AWAY'); }
       if (this.phase === 'route') {
+        if (p.routed) return;   // already binned: extra taps must not restart the ceremony
         this.bins.forEach(b => {
           if (!inRect(tp, b)) return;
           if (b.label === 'MIXED') { AUDIO.sfx('S_BIN_RIGHT'); this.binToast = 'MIXED. correct.'; }
@@ -117,7 +119,6 @@ MINIGAMES.CLEAN_UP = {
     });
     mgBtn(ctx, this.leaveBtn, false);
     if (this.binToastT > 0) {
-      this.binToastT -= 1 / 60;
       ctx.fillStyle = PAL20.K; ctx.fillRect(8, 196, 164, 16);
       ctx.strokeStyle = this.binToast.includes('correct') ? PAL20.G : PAL20.C;
       ctx.strokeRect(8.5, 196.5, 163, 15);
@@ -243,10 +244,16 @@ MINIGAMES.THE_DINNER = {
     this.meat = 0; this.adds = 0;
     // v3.2 playtest: ingredients drift past on two lanes, full names written out
     const NAMES = { rice: 'rice', aubergine: 'aubergine', chickpeas: 'chickpeas', tofu: 'tofu', oat: 'oat cream', herbs: 'herbs', garlic: 'garlic', bacon: 'bacon', sausage: 'sausage', lard: 'lard', stock: 'chicken stock', fish: 'fish sauce' };
-    this.shelf = [
+    // no colour-coding, no meat lane: the labels are the whole game. shuffled every night.
+    const items = [
       ['rice', 0], ['bacon', 1], ['aubergine', 0], ['sausage', 1], ['chickpeas', 0], ['lard', 1],
       ['tofu', 0], ['stock', 1], ['oat', 0], ['fish', 1], ['herbs', 0], ['garlic', 0],
-    ].map(([k, m], i) => ({
+    ];
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    this.shelf = items.map(([k, m], i) => ({
       k, m, used: false, name: NAMES[k],
       cx: (Math.floor(i / 2)) * 92, lane: i % 2,
     }));
@@ -307,10 +314,10 @@ MINIGAMES.THE_DINNER = {
       if (s.cx < -40 || s.cx > 180) return;
       const y = MG_TOP + 40 + s.lane * 52;
       ctx.fillStyle = PAL20.D; ctx.fillRect(s.cx - 2, y - 2, 28, 28);
-      ctx.strokeStyle = s.m ? PAL20.R : PAL20.G; ctx.strokeRect(s.cx - 1.5, y - 1.5, 27, 27);
+      ctx.strokeStyle = PAL20.S; ctx.strokeRect(s.cx - 1.5, y - 1.5, 27, 27);
       const img = gridToCanvas(ingredient(s.k));
       ctx.drawImage(img, s.cx + 4, y + 4, 16, 16);
-      drawTextCenter(ctx, s.name, s.cx + 12, y + 28, s.m ? PAL20.C : PAL20.W);
+      drawTextCenter(ctx, s.name, s.cx + 12, y + 28, PAL20.W);
     });
     if (this.adds >= 3) mgBtn(ctx, this.doneBtn, false);
     if (this.flash > 0) {
@@ -324,7 +331,8 @@ MINIGAMES.THE_DINNER = {
       drawTextCenter(ctx, 'ZHENG: ' + this.zhengLine, 90, 204, PAL20.P);
     }
     drawTextCenter(ctx, 'tap food as it drifts past.', 90, 262, PAL20.T);
-    drawTextCenter(ctx, 'green: TASTE. red: TASTE and MEAT.', 90, 272, PAL20.T);
+    drawTextCenter(ctx, 'the guests are vegetarian.', 90, 272, PAL20.T);
+    drawTextCenter(ctx, 'read the labels.', 90, 282, PAL20.T);
   },
   result() { return { win: true, meat: this.meat, taste: this.taste, adds: this.adds }; },
 };
