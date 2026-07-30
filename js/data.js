@@ -26,6 +26,27 @@ const TAROT_DAYS = [null,
   ['wheel', 'WHEEL OF FORTUNE', 'Money moves today. It does not come back.'],
   ['fool', 'THE FOOL', 'Go.'],
 ];
+/* the full deck Anna works from: three offered a day, a card read once is never read again */
+const TAROT_POOL = [
+  ...TAROT_DAYS.slice(1),
+  ['moon', 'THE MOON', 'You are being lied to by something small and domestic.'],
+  ['star', 'THE STAR', 'Help is nearer than it looks. Leave the door unlocked.'],
+  ['hermit', 'THE HERMIT', 'You will be alone today. Decide whether that is a punishment.'],
+  ['lovers', 'THE LOVERS', 'A choice between two things you want. You have already chosen. Stop pretending.'],
+  ['swords', 'TWO OF SWORDS', 'You will avoid a decision today. The decision will not avoid you.'],
+  ['temperance', 'TEMPERANCE', 'Do less of one thing. You know which thing.'],
+  ['sun', 'THE SUN', 'One good hour today. Do not spend it on the laptop.'],
+  ['hanged', 'THE HANGED MAN', 'Nothing moves today. That is somehow progress.'],
+  ['death', 'DEATH', 'An ending. Not the big kind. The kind that makes room.'],
+  ['magician', 'THE MAGICIAN', 'You have everything you need. That is not the same as enough.'],
+  ['priestess', 'THE HIGH PRIESTESS', 'You already know. You have known for some time.'],
+  ['empress', 'THE EMPRESS', 'Feed something today. The cat counts. So do you.'],
+  ['justice', 'JUSTICE', 'The scales balance today. Not in your favour. Balanced, though.'],
+  ['strength', 'STRENGTH', 'Gentleness will work today where force has not. As usual.'],
+  ['chariot', 'THE CHARIOT', 'You will be moved today. You will not be driving.'],
+  ['world', 'THE WORLD', 'The far away place is real. It stays real whether you go or not.'],
+  ['ace', 'ACE OF CUPS', 'Something small overflows today. Let it.'],
+];
 
 const N = (text) => ({ t: 'say', who: 'NARRATOR', text });
 const Z = (text, face) => ({ t: 'say', who: 'ZHENG', text, face });
@@ -65,11 +86,15 @@ DAYS[0] = [
   SAY('SUSAN', "so we're doing it"),
   Z('Doing what.'),
   SAY('SUSAN', "don't"),
+  N('Uzbekistan started three months ago, as a forty-second reel. Domes. A tiled square at golden hour. Bread the size of a wheel.'),
+  N('It was wedged, algorithmically, between two videos of shirtless men Zheng does not follow.'),
+  N('He watched the domes eleven times. He watched the other videos a normal amount of times.'),
   SAY('JOY', "she's got a spreadsheet"),
   SAY('SUSAN', 'I HAVE A SPREADSHEET'),
+  N('Nine tabs. Eight of them are places she wants to stand in. One of them is the price.'),
   SFXB('S_SLACK_PING'),
-  N('TASHKENT · €920'),
-  SAY('SUSAN', 'nine twenty. each. today.'),
+  N('TASHKENT · €882'),
+  SAY('SUSAN', 'eight eighty-two. each. today.'),
   SAY('SUSAN', 'it goes up every day. i checked every day for eleven days. it goes up every single day.'),
   Z('I know.'),
   SAY('SUSAN', "you don't know. you've had that tab open since march and you have never once pressed anything."),
@@ -116,14 +141,118 @@ CHOICES = {};
 CHOICES.TAROT = {
   prompt: [],
   options: [
-    { label: 'Ask Anna to read the cards', apply: s => { s.tarotCount++; },
+    { label: 'Ask Anna to read the cards', apply: s => {
+        s.tarotCount++; bump('sanity', 1);
+        s.tarotUsed = s.tarotUsed || [];
+        const unused = TAROT_POOL.filter(c => !s.tarotUsed.includes(c[0]));
+        const offer = []; let seed = s.day * 31 + s.tarotCount * 7 + 3;
+        for (let i = 0; i < 3 && unused.length; i++) { seed = (seed * 13 + 17) % unused.length; offer.push(unused.splice(seed, 1)[0]); }
+        s._tarotOffer = offer;
+      },
       after: [
         { t: 'art', img: 'anna' },
-        SAY('ANNA', 'One card. Sit.', 'neutral'),
-        { t: 'tarotcard' },
-        { t: 'say', who: 'ANNA', face: 'reading', dyn: s => TAROT_DAYS[Math.min(7, Math.max(1, s.day))][2] },
+        SAY('ANNA', 'Sit.', 'neutral'),
+        N('She lays three cards face down. She does not look at them. She has never needed to look at them.'),
+        { t: 'choice', id: 'TAROT_PICK' },
       ] },
-    { label: 'Not today', apply: () => {}, after: [] },
+    { label: 'Not today', apply: () => {},
+      after: [N('Three floors down, a card gets turned over anyway. Unwitnessed.')] },
+  ],
+};
+CHOICES.TAROT_PICK = {
+  prompt: [],
+  options: [
+    { label: 'The left card', apply: s => { s._tarotPick = s._tarotOffer[0]; s.tarotUsed.push(s._tarotPick[0]); },
+      after: [{ t: 'tarotcard' }, { t: 'say', who: 'ANNA', face: 'reading', dyn: s => s._tarotPick[2] }] },
+    { label: 'The middle card', hide: s => (s._tarotOffer || []).length < 2,
+      apply: s => { s._tarotPick = s._tarotOffer[1]; s.tarotUsed.push(s._tarotPick[0]); },
+      after: [{ t: 'tarotcard' }, { t: 'say', who: 'ANNA', face: 'reading', dyn: s => s._tarotPick[2] }] },
+    { label: 'The right card', hide: s => (s._tarotOffer || []).length < 3,
+      apply: s => { s._tarotPick = s._tarotOffer[2]; s.tarotUsed.push(s._tarotPick[0]); },
+      after: [{ t: 'tarotcard' }, { t: 'say', who: 'ANNA', face: 'reading', dyn: s => s._tarotPick[2] }] },
+  ],
+};
+
+CHOICES.JULIUS_BREAK = {
+  prompt: [],
+  options: [
+    { label: 'Ask him to stay.', apply: s => { bump('love', 1); bump('sanity', -2); },
+      after: [
+        Z('Stay.'),
+        SAY('JULIUS', '...', 'hurt'),
+        SAY('JULIUS', "That's one word."),
+        Z('Stay. Please.'),
+        SAY('JULIUS', 'Two words.'),
+        N('He does not unpack. But he stops packing.'),
+        N('For now, he stops packing.'),
+      ] },
+    { label: 'Say nothing.', apply: () => {},
+      after: [
+        N('The packing continues, one gentle thing at a time.'),
+        N('Nobody says the word that would stop it. The word is available. It is one syllable.'),
+      ] },
+  ],
+};
+
+CHOICES.JOY_WED = {
+  prompt: [
+    { t: 'art', img: 'phone' },
+    SFXB('S_MSG_FLOOD'),
+    N('A text. Joy. The Aleksi situation, developing in real time.'),
+    SAY('JOY', "he hasn't replied in nine hours"),
+    SAY('JOY', 'nine. hours.'),
+  ],
+  options: [
+    { label: '"Mm."', apply: s => { s.contactToday = true; s.sagaHeard++; },
+      after: [N('It is the right thing to say. It is the only thing he has ever said about it.')] },
+    { label: '"Maybe he is busy?"', apply: s => { s.contactToday = true; s.sagaHeard++; bump('sanity', -1); },
+      after: [
+        SAY('JOY', 'BUSY'),
+        SAY('JOY', 'nine hours zheng'),
+        Z('Mm.'),
+        N('He should have opened with that.'),
+      ] },
+    { label: 'Leave it on read', apply: s => { s.unread += 2; },
+      after: [N('Joy sees the read receipt. The read receipt sees her. Two follow-ups join the queue.')] },
+  ],
+};
+
+CHOICES.JOY_THU = {
+  prompt: [
+    { t: 'art', img: 'phone' },
+    SFXB('S_MSG_FLOOD'),
+    N('Joy again. Labels are being discussed. Not the recycling kind.'),
+    SAY('JOY', "okay so we're not doing labels"),
+    SAY('JOY', 'which is fine'),
+    SAY('JOY', 'which is what i wanted'),
+  ],
+  options: [
+    { label: '"Mm."', apply: s => { s.contactToday = true; s.sagaHeard++; },
+      after: [N('Another Mm. She reads it as wisdom. It might be.')] },
+    { label: '"Do YOU want labels?"', apply: s => { s.contactToday = true; s.sagaHeard++; bump('sanity', -1); },
+      after: [
+        SAY('JOY', '...'),
+        SAY('JOY', 'anyway'),
+        Z('Mm.'),
+        N('Too far. He knows it. The anyway knows it.'),
+      ] },
+    { label: 'Leave it on read', apply: s => { s.unread += 2; },
+      after: [N('The three dots appear, and think better of it, and go away. Two unread somethings stay behind.')] },
+  ],
+};
+
+CHOICES.WORK_CALL = {
+  prompt: [
+    SFXB('S_SANDAL_STING'),
+    { t: 'say', who: 'SANDAL', dyn: s => (s.callsToday || 0) === 0
+      ? 'Zheng! Quick call? Five minutes.'
+      : "Zheng. One more quick one. It's about the first one." },
+  ],
+  options: [
+    { label: 'Answer it', apply: s => { s.callsToday = (s.callsToday || 0) + 1; bump('sanity', -1); },
+      after: [N('It is not quick. It is never quick. Nothing aligns and it takes twenty minutes not to.')] },
+    { label: 'Let it ring out', apply: s => { s.callsToday = (s.callsToday || 0) + 1; bump('sanity', 1); s.unread += 3; },
+      after: [N('The ringing stops. Three messages arrive in its place. They join the queue, and the queue does not forget.')] },
   ],
 };
 
@@ -139,7 +268,8 @@ CHOICES.BORROW = {
     { label: 'Anna: €150', require: s => Object.keys(s.borrowed).length === 0,
       apply: s => { s.money += 150; s.borrowed.anna = true; bump('sanity', -2); },
       after: [SAY('ANNA', 'I will not take interest. Sit down. We are going to look at what the cards think of this.', 'reading'), N('The cards think a great deal of it.')] },
-    { label: 'Manage without', apply: () => {}, after: [] },
+    { label: 'Manage without', apply: s => { bump('sanity', -1) },
+      after: [N('He manages. The word for this feeling is not "managing".')] },
   ],
 };
 
@@ -245,13 +375,19 @@ DAYS[2] = [
   { t: 'game', id: 'SLACK_STORM' },
   SAY('SANDAL', "Just four words, Zheng. Four words, on how you would describe your own contribution. For the form. It's just for the form."),
   { t: 'game', id: 'PERFORMANCE_REVIEW' },
-  { t: 'art', img: 'phone' },
-  ...VOMIT_DAY(2, 2, [N('Kinu has vomited inside his left shoe. He will find out about it at 18:40, with his foot.')]),
+  { t: 'art', img: 'apartment_hot' },
+  ...VOMIT_DAY(2, 2, [
+    { t: 'art', img: 'boots_ruined' },
+  N('Kinu has vomited inside his left shoe. He will find out about it at 18:40, with his foot.'),
+    N('18:40. He finds out.'),
+  ]),
   { t: 'choice', id: 'SUSANJOY' },
   { t: 'ledger', title: 'TUESDAY CLOSED', lines: s => ['Fund: €' + s.money, 'Tashkent tomorrow: €996'] },
 ];
 CHOICES.SUSANJOY = {
   prompt: [
+    { t: 'art', img: 'phone' },
+    N('The phone lights up twice, then five more times. The group chat is named "flight club". He has muted it twice. It does not take.'),
     SFXB('S_MSG_FLOOD'),
     SAY('SUSAN', 'zheng'),
     SAY('SUSAN', 'zheng'),
@@ -307,6 +443,7 @@ CHOICES.TEMU = {
   prompt: [
     { t: 'art', img: 'phone' },
     N("Zheng's phone case is two strips of tape and the memory of a phone case."),
+    N('The listing: "Cute Silicone Cat Bomb Case". Plus a screen protector. Plus shipping. All of it together, two euros nineteen.'),
     Z("It's two euros nineteen."),
     SAY('JULIUS', 'Do you know what that actually costs?', 'curious'),
     Z('Two euros nineteen.'),
@@ -315,7 +452,7 @@ CHOICES.TEMU = {
     SAY('JULIUS', 'Zheng.'),
   ],
   options: [
-    { label: 'Buy it. Say nothing.', apply: s => { s.money -= 2; bump('sanity', 3); s.f.temuSecret = true; s.f.packageArrives = Math.random() < 0.4; },
+    { label: 'Buy the case + protector. Say nothing.', apply: s => { s.money -= 2; bump('sanity', 3); s.f.temuSecret = true; s.f.packageArrives = Math.random() < 0.4; },
       after: [
         SFXB('S_TEMU_BUY'),
         { t: 'art', img: 'dark' },
@@ -342,7 +479,7 @@ DAYS[4] = [
   { t: 'art', img: 'apartment_hot', music: 'M_HOME_HOT' },
   { t: 'choice', id: 'TAROT' },
   ...VOMIT_DAY(4, 3, [N('Kinu has vomited on the wifi router. There are sparks. The internet is gone for forty minutes and nobody at work believes him.')]),
-  N('There is no air conditioning. There has never been an air conditioning. There is one fan, on a stand, and it points at exactly one thing at a time.'),
+  N('There is no air conditioning. There has never been air conditioning. There is one fan, on a stand, and it points at exactly one thing at a time.'),
   { t: 'game', id: 'THE_FAN' },
   SAY('JULIUS', "I unplugged the fan? It was making a noise and I was on a call. I'm really sorry. I mean that."),
   N('He apologises sincerely and at length and does not plug it back in.'),
@@ -378,23 +515,56 @@ DAYS[4] = [
 ];
 CHOICES.OVERTIME = {
   prompt: [
-    { t: 'if', cond: s => s.job <= 2, then: [
+    { t: 'if', cond: s => s.job < 2, then: [
       SAY('SANDAL', "So we've put together a bit of a plan for you. The plan is you're here tonight. It's a good plan."),
       N('Overtime is not a choice tonight. It is a plan.'),
     ], else: [
-      SAY('SANDAL', 'No pressure at all. Genuinely, none. But it would be really visible.'),
+      { t: 'if', cond: s => s.overtime === 0, then: [
+        SAY('SANDAL', 'No pressure at all. Genuinely, none. But it would be really visible.'),
+      ] },
+      { t: 'if', cond: s => s.overtime === 1, then: [
+        SAY('SANDAL', "One more push? We're basically there."),
+        N('He does not say where there is. Nobody has ever seen there.'),
+      ] },
+      { t: 'if', cond: s => s.overtime === 2, then: [
+        SAY('SANDAL', "You're a machine, Zheng."),
+        N('He means it as a compliment. He means everything as a compliment.'),
+      ] },
+      { t: 'if', cond: s => s.overtime === 3, then: [
+        N('Sandal has stopped selling it. He just points at the deck.'),
+      ] },
+      { t: 'if', cond: s => s.overtime === 4, then: [
+        N('It is 22:40. The question has stopped being a question.'),
+      ] },
     ] },
   ],
   options: [
     { label: 'Stay', apply: s => { s.money += s.job >= 2 ? 40 : 0; bump('sanity', -2); bump('love', -1); s.overtime++; },
       after: [
         { t: 'if', cond: s => s.job >= 2, then: [SFXB('S_COIN')], else: [N('There is no overtime money anymore. There is nothing left to be visible for.')] },
-        SAY('JULIUS', 'are you coming home'),
-        SAY('JULIUS', "it's okay if not"),
-        SAY('JULIUS', "it's just the thing was tonight"),
-        Z('What thing.'),
-        N('No reply. There is no reply for the rest of the game.'),
-        { t: 'if', cond: s => s.overtime < 3, then: [{ t: 'choice', id: 'OVERTIME' }] },
+        { t: 'if', cond: s => s.overtime === 1, then: [
+          SAY('JULIUS', 'are you coming home'),
+          SAY('JULIUS', "it's okay if not"),
+          SAY('JULIUS', "it's just the thing was tonight"),
+          Z('What thing.'),
+          N('No reply. There is no reply for the rest of the game.'),
+        ] },
+        { t: 'if', cond: s => s.overtime === 2, then: [
+          SAY('SANDAL', 'Still here! Love it. LOVE it.'),
+          N('The office empties around him, desk by desk, like a tide going out.'),
+        ] },
+        { t: 'if', cond: s => s.overtime === 3, then: [
+          N('The cleaner comes through at nine. They nod at each other like colleagues, which by now they are.'),
+        ] },
+        { t: 'if', cond: s => s.overtime === 4, then: [
+          N('The fluorescent light ticks. He does not hear it anymore.'),
+          N('That is worse.'),
+        ] },
+        { t: 'if', cond: s => s.overtime === 5, then: [
+          SAY('SANDAL', "Go home, Zheng. Even I'm going home."),
+          N('Sandal leaves. Zheng stays another forty minutes, out of something that is not loyalty.'),
+        ] },
+        { t: 'if', cond: s => s.overtime < 5, then: [{ t: 'choice', id: 'OVERTIME' }] },
       ] },
     { label: 'Go home', require: s => s.job > 2, apply: s => { bump('job', -1); },
       after: [
@@ -410,9 +580,9 @@ DAYS[5] = [
   { t: 'art', img: 'apartment_hot', music: 'M_HOME_HOT' },
   { t: 'choice', id: 'TAROT' },
   SFXB('S_COIN_BIG'),
-  { t: 'money', delta: 700, label: 'SALARY: €700' },
+  { t: 'money', delta: 900, label: 'SALARY: €900' },
   { t: 'face', who: 'ZHENG', face: 'happy' },
-  N('Seven hundred euros. For four seconds, Zheng is a wealthy man.'),
+  N('Nine hundred euros. For four seconds, Zheng is a wealthy man.'),
   SFXB('S_BILL_STAMP'),
   { t: 'money', delta: s => -(ELECTRICITY_BASE + 12 * s.fanTaps), label: 'ELECTRICITY' },
   N('The four seconds are over.'),
@@ -438,42 +608,20 @@ DAYS[5] = [
   { t: 'face', who: 'ZHENG', face: 'joy' },
   N('It cost two euros ninety. He has thought about it four times since.'),
   { t: 'art', img: 'kitchen', music: 'M_JULIUS' },
-  { t: 'if', cond: s => s.f.juliusGone, then: [
-    SFXB('S_JULIUS_APPEAR'),
-    N('Julius is in the kitchen. He came back for the dinner.'),
-    N('His friends are coming at seven. He would not cancel on five people over a break. He would not cancel on five people over anything.'),
-    SAY('JULIUS', "I'm here for the dinner? This doesn't change the other thing.", 'curious'),
-    Z('I know.'),
-    SAY('JULIUS', 'Okay. Good. Aprons are where they always are.'),
-    N('He says it gently. He says everything gently. That is the whole problem.'),
+  { t: 'if', cond: s => s.juliusTrust !== 'LOW', then: [
+    SAY('JULIUS', "My friends are coming at seven? You're cooking.", 'warm'),
+    Z("I'm not a vegetarian."),
+    SAY('JULIUS', 'Neither am I?'),
+    Z('...'),
+    SAY('JULIUS', "It's for them. Sun doesn't do meat, Aapo's got the gluten thing, and Rasmus won't say anything but he will notice."),
+    Z('You eat meat.'),
+    SAY('JULIUS', 'I had a chicken thing on Tuesday. You were there.'),
+    Z('...'),
+    N('He was there.'),
+    SAY('JULIUS', "Miro's bringing a thing."),
+    Z('What thing.'),
+    SAY('JULIUS', 'A thing.'),
   ] },
-  { t: 'if', cond: s => s.juliusTrust === 'HIGH', then: [
-    SAY('JULIUS', 'He did the whole bag. On Wednesday. Every single one, right first time.', 'warm'),
-    SAY('AAPO', 'The whole bag?'),
-    SAY('JULIUS', 'The whole bag.'),
-    SAY('AINO', 'Including the tea bags?'),
-    SAY('JULIUS', 'Including the tea bags.'),
-    { t: 'hold', s: 2 },
-    N('Zheng is standing in the doorway holding a bag of shopping.'),
-    N('Nobody is talking to him. Julius is talking about him, to four people, and every one of them is impressed.'),
-    { t: 'pause', s: 2 },
-    N('It is the nicest thing that happens to him all week and it is about bins.'),
-    { t: 'do', fn: s => bump('sanity', 2) },
-  ] },
-  SAY('JULIUS', "My friends are coming at seven? You're cooking.", 'warm'),
-  Z("I'm not a vegetarian."),
-  SAY('JULIUS', 'Neither am I?'),
-  Z('...'),
-  SAY('JULIUS', "It's for them. Sun doesn't do meat, Aapo's got the gluten thing, and Rasmus won't say anything but he will notice."),
-  Z('You eat meat.'),
-  SAY('JULIUS', 'I had a chicken thing on Tuesday. You were there.'),
-  Z('...'),
-  N('He was there.'),
-  SAY('JULIUS', "Miro's bringing a thing."),
-  Z('What thing.'),
-  SAY('JULIUS', 'A thing.'),
-  SAY('AINO', "I brought wine. It's vegan, but that's not a thing I need anyone to care about.", 'warm'),
-  N('There was a scandal. Rasmus will know. Rasmus always knows.'),
   { t: 'choice', id: 'OATCREAM' },
   { t: 'if', cond: s => s.juliusTrust === 'LOW', then: [
     // Wednesday's bins hard-locked this. He has already cooked.
@@ -483,6 +631,21 @@ DAYS[5] = [
     N('He stands in the doorway of his own kitchen for the length of this box.'),
   ], else: [
     { t: 'game', id: 'THE_DINNER' },
+  ] },
+  SAY('AINO', "I brought wine. It's vegan, but that's not a thing I need anyone to care about.", 'warm'),
+  N('There was a scandal about the last wine. Rasmus will know. Rasmus always knows.'),
+  { t: 'if', cond: s => s.juliusTrust === 'HIGH', then: [
+    SAY('JULIUS', 'He did the whole bag. On Wednesday. Every single one, right first time.', 'warm'),
+    SAY('AAPO', 'The whole bag?'),
+    SAY('JULIUS', 'The whole bag.'),
+    SAY('AINO', 'Including the tea bags?'),
+    SAY('JULIUS', 'Including the tea bags.'),
+    { t: 'hold', s: 2 },
+    N('Zheng is standing in the kitchen doorway, holding the empty pot.'),
+    N('Nobody is talking to him. Julius is talking about him, to four people, and every one of them is impressed.'),
+    { t: 'pause', s: 2 },
+    N('It is the nicest thing that happens to him all week and it is about bins.'),
+    { t: 'do', fn: s => bump('sanity', 2) },
   ] },
   { t: 'if', cond: s => s.smell >= 4, then: [
     SAY('SUN', 'Could we eat on the balcony, possibly?'),
@@ -502,15 +665,16 @@ DAYS[5] = [
   N('The dinner continues for one hour and fifty minutes.'),
   SAY('AINO', "Thank you for cooking. That's a lot of work for five people.", 'warm'),
   N('She means it. She means it every time.'),
-  { t: 'if', cond: s => s.f.juliusGone && s.love >= 2, then: [
-    N('Julius does the dishes. All of them. Slowly.'),
-    N('The last train to Tampere is at 23:41. He looks at the time once, and then he does the pans as well.'),
-    N('He misses the train. On purpose, as far as anyone can tell.'),
-    { t: 'do', fn: s => { s.f.juliusGone = false; GFX.envCache = {}; } },
+  { t: 'if', cond: s => s.f.breakAnnounced && s.love >= 2, then: [
+    N('Julius does the dishes. All of them. Slowly. The pans as well.'),
+    { t: 'say', who: 'NARRATOR', dyn: s => s.f.soldCrock
+      ? 'Then, without a word, he unpacks the bag.'
+      : 'Then, without a word, he unpacks the bag. The crock goes back on the shelf.' },
+    N('Nobody calls the break off out loud. It is off.'),
+    { t: 'do', fn: s => { s.f.breakAnnounced = false; } },
   ] },
-  { t: 'if', cond: s => s.f.juliusGone && s.love < 2, then: [
-    N('Julius does the dishes. All of them. Then he takes the last train back to Tampere.'),
-    N('He leaves the kitchen cleaner than the break found it.'),
+  { t: 'if', cond: s => s.f.breakAnnounced && s.love < 2, then: [
+    N('Julius does the dishes. All of them. The bag stays by the door. Packed, and polite, and patient.'),
   ] },
   { t: 'ledger', title: 'FRIDAY CLOSED', lines: s => ['Fund: €' + s.money, 'Tashkent tomorrow: €1,110'] },
 ];
@@ -592,13 +756,6 @@ DAYS[6] = [
         N('It is thirty three degrees. There is a bucket of cabbage. Nine bins. Grey toilet paper.'),
         N("For eleven minutes, Zheng's two worlds are in the same room. He says nothing at all. He has never been happier, or more frightened."),
         { t: 'do', fn: s => { bump('sanity', 3); bump('love', 1); bump('friends', 1); } },
-      ], else: [
-        N("Zheng's apartment. Susan and Joy in the doorway. Nobody is holding a bin lid."),
-        SAY('JOY', "it's so tidy. why is it so tidy."),
-        SAY('SUSAN', 'where is he'),
-        Z('...'),
-        N('For eleven minutes, two of his worlds are in the same room, and the third is two hundred kilometres north, watering his mother\'s plants.'),
-        { t: 'do', fn: s => { bump('sanity', 1); bump('friends', 1); } },
       ] },
     ] },
   ], else: [
@@ -617,7 +774,7 @@ DAYS[6] = [
     { t: 'do', fn: s => { s.mattBond = Math.max(0, s.mattBond - 3); } },
     N('He leaves the second controller on the shelf where the console was. Nobody asked him to.'),
   ], else: [
-    { t: 'if', cond: s => s.mattBond >= 3, then: [
+    { t: 'if', cond: s => s.mattBond >= 3 && Object.keys(s.borrowed).length === 0, then: [
       SFXB('S_SLACK_PING'),
       SAY('MATT', 'hey. you looked stressed on tuesday. i can do 200. not a loan. a "whenever".', 'delighted'),
       { t: 'choice', id: 'MATT_LOAN' },
@@ -642,13 +799,7 @@ DAYS[6] = [
       ] },
     ] },
   ] },
-  { t: 'if', cond: s => s.f.temuSecret && s.f.packageArrives && s.f.juliusGone, then: [
-    SFXB('S_PACKAGE'),
-    N('A package arrives. "Cute Silicone Cat Bomb Case."'),
-    N('He opens it alone, at the kitchen table. It is very cute. There is nobody to hide it from anymore.'),
-    { t: 'do', fn: s => { bump('sanity', -1); } },
-  ] },
-  { t: 'if', cond: s => s.f.temuSecret && s.f.packageArrives && !s.f.juliusGone, then: [
+  { t: 'if', cond: s => s.f.temuSecret && s.f.packageArrives, then: [
     SFXB('S_PACKAGE'),
     SAY('JULIUS', "There's a package?", 'curious'),
     Z('...', 'alarm'),
@@ -666,8 +817,8 @@ CHOICES.MATT_LOAN = {
   options: [
     { label: 'Take it', require: s => Object.keys(s.borrowed).length === 0, apply: s => { s.money += 200; s.borrowed.matt = true; },
       after: [SAY('MATT', 'cool. anyway. hat looks great on you btw'), N('He never mentions it again, ever, in any ending.')] },
-    { label: '"I\'m okay. Thank you."', apply: () => {},
-      after: [SAY('MATT', 'ok. offer stands. forever. no expiry.'), N('He means the forever.')] },
+    { label: '"I\'m okay. Thank you."', apply: s => { s.mattBond = Math.min(5, s.mattBond + 1); },
+      after: [SAY('MATT', 'ok. offer stands. forever. no expiry.'), N('He means the forever. Something in the room gets quietly stronger.')] },
   ],
 };
 CHOICES.TORI = {
@@ -697,12 +848,13 @@ CHOICES.TORI = {
     { label: "Julius's fermentation crock (+€60)", hide: s => s.sold.includes('crock'), apply: s => { s.money += 60; bump('love', -3); s.sold.push('crock'); s.f.soldCrock = true; },
       after: [
         SFXB('S_COIN'),
-        N('He notices within the hour. He does not say anything. He just stands where it was for a while, and then goes to bed early.'),
+        N('Julius notices within the hour. He does not say anything. He just stands where it was for a while, and then goes to bed early.'),
         { t: 'if', cond: s => s.sold.length < 2, then: [{ t: 'choice', id: 'TORI' }] },
       ] },
     { label: '3 more items', hide: s => s.sold.length === 0,
       apply: () => {}, after: [{ t: 'choice', id: 'TORI_MORE' }] },
-    { label: 'Sell nothing', apply: () => {}, after: [N('Everything stays. Everything always stays.')] },
+    { label: 'Sell nothing', apply: s => { bump('sanity', 1) },
+      after: [N('Everything stays. Everything always stays. It is oddly restful.')] },
   ],
 };
 
@@ -810,7 +962,14 @@ CHOICES.JULIUS7 = {
   prompt: [
     { t: 'art', img: 'apartment_hot' },
     { t: 'if', cond: s => s.love >= 1, then: [N('Julius, on the sofa, holding a jar.')], else: [
-      N("Julius is still at his mother's in Tampere. The break is still a break. The hair gels are still here."),
+      { t: 'if', cond: s => s.f.breakAnnounced, then: [
+        { t: 'say', who: 'NARRATOR', dyn: s => s.f.soldCrock
+          ? 'Julius, on the sofa, next to a packed bag. The jars are in the bag. The hair gels are still in the bathroom.'
+          : 'Julius, on the sofa, next to a packed bag. The crock is in the bag. The hair gels are still in the bathroom.' },
+        N('He leaves after the weekend. Nothing about this evening will be said out loud.'),
+      ], else: [
+        N('Julius, on the sofa, at the far end of it. The distance is new, and neither of them mentions it.'),
+      ] },
     ] },
   ],
   options: [
@@ -896,7 +1055,7 @@ const ENDINGS = {
     'At 02:00 he has a long, detailed conversation with Kinu through the hotel minibar. Kinu is not in the minibar. Kinu is in Helsinki.',
     'He orders two plates again the next day, and the day after.',
     'By every measurable standard, the trip is a triumph.'] },
-  '11101': { title: 'SOLO TRAVELLER ARC', tone: 'GOOD', text: [
+  '11101': { title: 'ONE PHOTOGRAPH OF A MOSQUE', tone: 'GOOD', text: [
     'He posts one photograph of a mosque. One. Captioned with the name of the mosque and nothing else.',
     'Julius likes it in ninety seconds.',
     'Julius always likes it in ninety seconds.'] },
@@ -916,11 +1075,11 @@ const ENDINGS = {
   '11001': { title: 'NO CAT, NO MAN, FULL WALLET', tone: 'CALM', text: [
     'He has money left over. He eats well. He walks eleven kilometres a day and sleeps like a stone.',
     'He looks extraordinary in the photographs.',
-    'There are a great many photographs, and he took every single one of them himself.'] },
+    'There are a great many photographs. He is not in any of them.'] },
   '11000': { title: 'MAN, ALONE, ABROAD, UNWELL', tone: 'BLEAK', text: [
     'He orders plov for two and eats both plates.',
     'Afterwards he describes the meal, out loud, in detail, for eleven minutes.',
-    'There is nobody at the table.'] },
+    'Nobody asked about the meal. He describes it anyway.'] },
   '10111': { title: 'UNEMPLOYED IN UZBEKISTAN', tone: 'GOOD', text: [
     'Fired on Friday. Flying on Saturday. Eating garlic out of a metal tray by Sunday lunchtime.',
     "Sandal's reply is four hundred and ten words long and arrives in twelve parts.",
@@ -949,7 +1108,7 @@ const ENDINGS = {
     'He brought a reusable cup. Neither of them drinks from it.',
     'Four days later Zheng sends a photograph of a plate. Julius replies with a heart. That is the whole conversation and it is enough.'] },
   '10001': { title: 'NOTHING LEFT TO CARRY', tone: 'CALM', text: [
-    'One bag. Fired, single, catless, and completely calm.',
+    'One bag. Fired, on a break, catless, and completely calm.',
     'He has never felt lighter.',
     'Everyone who knows him finds this concerning, and he understands why, and it does not change anything.'] },
   '10000': { title: 'ONE-WAY TICKET', tone: 'BLEAK', text: [
@@ -969,15 +1128,15 @@ const ENDINGS = {
     'He says "next year" with total, uncomplicated sincerity and he is not lying.',
     'He might even be right.'] },
   '01100': { title: 'REFRESHING THE PRICE AT 04:00', tone: 'BLEAK', text: [
-    'Employed, single, broke, unravelling.',
+    'Employed, on a break, broke, unravelling.',
     'The apartment is 31°C. The window is shut. The tab is open.',
     'The price has gone up again.'] },
-  '01011': { title: 'THE VET TOOK UZBEKISTAN', tone: 'WEIRD', text: [
-    '€1,050 in the account. €140 out the door. Cat gone anyway.',
+  '01011': { title: 'THE CAT TAX', tone: 'WEIRD', text: [
+    'The fund is short. The cat is gone. The two facts are not even related, which is somehow worse.',
     'The universe invoiced him in full and delivered nothing.',
-    'He keeps the receipt. He does not know why.'] },
+    'He keeps the receipts. He does not know why.'] },
   '01010': { title: 'THE INVOICE FOLDER', tone: 'BLEAK', text: [
-    'He files the vet bill in the same folder as the flight quotes.',
+    "He files the week's receipts in the same folder as the flight quotes.",
     'The folder is called "later". It has forty-one things in it.',
     'He opens it on Sundays.'] },
   '01001': { title: 'A REAL ASSET (SARCASTICALLY)', tone: 'BLEAK', text: [
@@ -1043,7 +1202,7 @@ function arrivalBeats(s) {
     b.push(SAY('SUSAN', "that's a river"));
     b.push(SAY('JOY', 'is the river it'));
     b.push(SAY('SUSAN', 'joy the river is not the country'));
-    b.push(N('They have been awake for nineteen hours. Susan has a spreadsheet. It is colour coded. It has a tab called "backup restaurants".'));
+    b.push(N('They have been awake for nineteen hours. Susan has a spreadsheet. It is colour coded. It has a tab called "THE BLUE ONES" and a tab called "backup restaurants".'));
     b.push(SAY('JOY', "i didn't tell you. aleksi messaged."));
     b.push(Z('Mm.'));
   } else {
@@ -1052,7 +1211,7 @@ function arrivalBeats(s) {
   }
   if (K) {
     b.push(N("Three floors below an empty apartment, Kinu is having a holiday of her own, at Anna's, on the black wool coat."));
-    b.push(N('There is a bowl with her name on it. Anna wrote the name.'));
+    b.push(N("There is a bowl with her name on it, in Anna's handwriting. Permanent marker."));
   } else {
     b.push(N('Three floors below his empty apartment, a cat is asleep on a black wool coat that somebody deliberately left on a chair for her.'));
     b.push(N('She is not thinking about him. That is not a criticism. That is just what cats are.'));
@@ -1075,12 +1234,15 @@ function arrivalBeats(s) {
     b.push(N('He checks it anyway. Twice. Out of muscle memory. Then he stops.'));
   }
   if (GIRLS) {
-    b.push(SAY('SUSAN', 'Hi, hello, do you take card? Card? Do you, sorry, do you take card?'));
+    b.push(SAY('SUSAN', 'hi, hello, do you take card? card? do you, sorry, do you take card?'));
     b.push(N('He takes card.'));
-    b.push(SAY('SUSAN', 'He takes card!'));
+    b.push(SAY('SUSAN', 'he takes card!'));
     b.push(SAY('JOY', 'susan he said that'));
-    b.push(SAY('SUSAN', "I'm CONFIRMING"));
-    b.push(N('Susan pays for the taxi. She will bring this up on Thursday, and on Friday, and once in October.'));
+    b.push(SAY('SUSAN', "i'm CONFIRMING"));
+    b.push(N('Susan pays for the taxi without looking at the amount. She is looking at the map on her phone. The map has seventeen pins on it.'));
+    b.push(SAY('SUSAN', 'tomorrow: the big square at sunrise. then the bread market. then the very blue one.'));
+    b.push(SAY('JOY', 'which one is the very blue one'));
+    b.push(SAY('SUSAN', "you'll know it when we're in it"));
   }
   if (!SA) {
     b.push(N('The meter says a number. Then a slightly different number. Then the first one again.'));
@@ -1100,10 +1262,10 @@ function arrivalBeats(s) {
   b.push(N('Then he eats.'));
   if (GIRLS) {
     b.push(SAY('JOY', 'this is the best thing i have ever eaten', 'delighted'));
-    b.push(SAY('SUSAN', "it's two forty"));
+    b.push(SAY('SUSAN', 'the plov was number four on the list. we are at number four already.', 'delighted'));
     b.push(SAY('JOY', 'SUSAN'));
-    b.push(SAY('SUSAN', "I'm saying it's GOOD VALUE"));
-    b.push(N('Susan orders four more. Susan pays. Susan will mention this.'));
+    b.push(SAY('SUSAN', "i'm saying it's HAPPENING"));
+    b.push(N('Susan orders four more. Susan pays. She never mentions it, then or ever.'));
     b.push(SAY('JOY', 'you did this. this was you.', 'emotional'));
     b.push(Z('...'));
     b.push(SAY('JOY', "don't do the mm. not now."));
@@ -1117,7 +1279,7 @@ function arrivalBeats(s) {
     b.push(N('Anna sends one photograph a day. No message. Just Kinu, asleep, somewhere new each time.'));
     b.push(N('He looks at each one for a while. Longer than the mosques.'));
   }
-  if (!SA) {
+  if (!SA && !GIRLS) {
     b.push(N('He orders two plates.'));
     b.push(N('Nobody asks who the second one is for, and he is grateful, because he does not have an answer ready.'));
   }

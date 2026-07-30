@@ -440,7 +440,7 @@ class TermsScene {
 class TarotScene {
   constructor() {
     this.t = 0;
-    this.data = TAROT_DAYS[Math.min(7, Math.max(1, S.day))];
+    this.data = S._tarotPick || TAROT_DAYS[Math.min(7, Math.max(1, S.day))];
   }
   update(dt) { this.t += dt; }
   tap() {
@@ -451,7 +451,8 @@ class TarotScene {
     drawStage(ctx);
     ctx.fillStyle = 'rgba(26,20,32,0.75)'; ctx.fillRect(0, HUD_H, W, H - HUD_H);
     const flip = this.t > 0.7;
-    const img = GFX.tarot[flip ? this.data[0] : 'back'];
+    const img = (flip && GFX.tarot[this.data[0]]) || GFX.tarot.back;
+    if (flip && !GFX.tarot[this.data[0]]) { /* art pending from the design file: name the card on the back */ }
     ctx.drawImage(img, 54, 90, 72, 120);
     if (flip) drawTextCenter(ctx, this.data[1], 90, 222, PAL20.C);
     if (this.t > 1.2 && Math.floor(this.t * 2) % 2 === 0) drawTextCenter(ctx, 'tap', 90, 240, PAL20.T);
@@ -845,47 +846,35 @@ function dailySystemBeats(d) {
   // lunch money (3.9 #5): at love 0 there are no leftovers whatsoever
   out.push({ t: 'do', fn: s => { if (s.love === 0) s.money -= 12; else if (s.love <= 3) s.money -= 8; } });
   // the espresso machine is in Espoo. Monday still exists. (drain handles the sanity)
-  // love = 0, once: not a breakup. a break. those are different. they're different.
-  out.push({ t: 'if', cond: s => s.love === 0 && !s.f.juliusGone, then: [
-    { t: 'do', fn: s => { s.f.juliusGone = true; GFX.envCache = {}; } },
+  // love = 0, once: not a breakup. a break. scheduled for after the weekend.
+  out.push({ t: 'if', cond: s => s.love === 0 && !s.f.breakAnnounced, then: [
+    { t: 'do', fn: s => { s.f.breakAnnounced = true; } },
     { t: 'sfx', id: 'S_JULIUS_APPEAR' },
-    { t: 'say', who: 'JULIUS', face: 'hurt', text: "I think I need to go to my mum's for a bit? Not forever. A bit." },
+    { t: 'say', who: 'JULIUS', face: 'hurt', dyn: s => s.day <= 5
+      ? "I think I should go to my mum's for a while? After the weekend. After the dinner. I'm not going to cancel the dinner."
+      : "I think I should go to my mum's for a while? After the weekend. Monday morning, probably. Early." },
     { t: 'say', who: 'ZHENG', text: '...' },
     { t: 'say', who: 'JULIUS', face: 'hurt', text: "It's not a breaking-up thing. It's a break thing. Those are different?" },
     { t: 'say', who: 'ZHENG', text: 'Okay.' },
     { t: 'say', who: 'JULIUS', face: 'hurt', text: "They're different." },
-    { t: 'say', who: 'NARRATOR', text: 'He packs the crock. He leaves his hair gels.' },
-    { t: 'say', who: 'NARRATOR', text: 'Leaving the hair gels means he is coming back. Probably it means he is coming back.' },
-    { t: 'say', who: 'NARRATOR', text: 'The apartment is cool and quiet and it is much easier to work.' },
-    { t: 'do', fn: s => bump('sanity', 2) },   // that should feel terrible
+    { t: 'say', who: 'NARRATOR', dyn: s => s.f.soldCrock
+      ? 'He starts packing now. Slowly. One gentle thing a day. There is less to pack than there was.'
+      : 'He starts packing now. Slowly. One gentle thing a day. The crock first.' },
+    { t: 'say', who: 'NARRATOR', text: 'He leaves the hair gels in the bathroom. Leaving the hair gels means it is not decided. Probably it means it is not decided.' },
+    { t: 'choice', id: 'JULIUS_BREAK' },
   ] });
-  // job <= 3: Sandal calls twice a day now, both unskippable (3.15)
+  // job <= 3: Sandal calls twice a day now, and each call is a decision (3.15 + playtest)
   if (d >= 2 && d <= 6) out.push({ t: 'if', cond: s => s.job <= 3 && s.job >= 1, then: [
-    { t: 'sfx', id: 'S_SANDAL_STING' },
-    { t: 'say', who: 'SANDAL', text: "Zheng! Quick call. It's not quick." },
-    { t: 'do', fn: s => { bump('sanity', -1); s.unread += 2; } },
+    { t: 'choice', id: 'WORK_CALL' },
   ] });
   // the meeting rename runs all seven days. never acknowledged. (3.15)
-  if (d >= 3) out.push({ t: 'sfx', id: 'S_TITLE_STAMP' });
-  if (d >= 3) out.push({ t: 'say', who: 'NARRATOR', text: '"' + MEETING_NAMES[d] + '"' });
+  if (d >= 3 && d < 7) out.push({ t: 'sfx', id: 'S_TITLE_STAMP' });
+  if (d >= 3 && d < 7) out.push({ t: 'say', who: 'NARRATOR', text: '"' + MEETING_NAMES[d] + '"' });
   // below €80, the lenders appear
   out.push({ t: 'if', cond: s => s.money < 80, then: [{ t: 'choice', id: 'BORROW' }] });
-  // Joy's saga, Wednesday and Thursday. the third and fourth Mm of six. (3.15)
-  if (d === 3) out.push({ t: 'if', cond: s => s.friends >= 1, then: [
-    { t: 'sfx', id: 'S_MSG_FLOOD' },
-    { t: 'say', who: 'JOY', text: "he hasn't replied in nine hours" },
-    { t: 'say', who: 'JOY', text: 'nine. hours.' },
-    { t: 'say', who: 'ZHENG', text: 'Mm.' },
-    { t: 'do', fn: s => { s.contactToday = true; s.sagaHeard++; } },
-  ] });
-  if (d === 4) out.push({ t: 'if', cond: s => s.friends >= 1, then: [
-    { t: 'sfx', id: 'S_MSG_FLOOD' },
-    { t: 'say', who: 'JOY', text: "okay so we're not doing labels" },
-    { t: 'say', who: 'JOY', text: 'which is fine' },
-    { t: 'say', who: 'JOY', text: 'which is what i wanted' },
-    { t: 'say', who: 'ZHENG', text: 'Mm.' },
-    { t: 'do', fn: s => { s.contactToday = true; s.sagaHeard++; } },
-  ] });
+  // Joy's saga, Wednesday and Thursday: texts arrive, and answering is a choice (3.15 + playtest)
+  if (d === 3) out.push({ t: 'if', cond: s => s.friends >= 1, then: [{ t: 'choice', id: 'JOY_WED' }] });
+  if (d === 4) out.push({ t: 'if', cond: s => s.friends >= 1, then: [{ t: 'choice', id: 'JOY_THU' }] });
   // sagaHeard payout: Sunday morning, before the companion check (3.8)
   if (d === 7) out.push({ t: 'if', cond: s => s.sagaHeard >= 6 && !s.f.sagaPaid, then: [
     { t: 'do', fn: s => { s.f.sagaPaid = true; bump('friends', 2); } },
@@ -917,6 +906,7 @@ function startDay(d) {
   if (d > 1) endOfDayDecay();
   S.day = d;
   S.coldOpen = true;   // cleared at the day's first choice or minigame
+  S.callsToday = 0;
   Object.keys(faceOverride).forEach(k => delete faceOverride[k]);   // yesterday's face stays in yesterday
   applyDailyDrain(d);
   if (d > 1) { AUDIO.sfx('S_PRICE_UP'); priceFlash = 2.5; }
@@ -925,9 +915,7 @@ function startDay(d) {
   beats.splice(2, 0, ...dailySystemBeats(d));   // after the day card AND the day's art
   if (d >= 2 && d <= 6) beats.splice(Math.max(4, Math.floor(beats.length * 0.6)), 0,
     { t: 'if', cond: s => s.job <= 3 && s.job >= 1, then: [
-      { t: 'sfx', id: 'S_SANDAL_STING' },
-      { t: 'say', who: 'SANDAL', text: "Zheng. One more quick one. It's about the first one." },
-      { t: 'do', fn: s => { bump('sanity', -1); s.unread += 2; } },
+      { t: 'choice', id: 'WORK_CALL' },
     ] });
   runBeats(beats, () => { if (d < 7) startDay(d + 1); });
 }

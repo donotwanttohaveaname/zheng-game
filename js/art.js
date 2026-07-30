@@ -403,9 +403,13 @@ function ovStains() {
   });
   return g;
 }
-function ovJulius(present) {
+function ovJulius(present, hot) {
   const g = G(180, 110);
-  if (!present) { rect(g, 62, 88, 56, 14, 'D'); return g; }
+  if (!present) {
+    rect(g, 62, 84, 56, 24, 'K'); rect(g, 62, 86, 56, 20, hot ? 'B' : 'S');
+    rect(g, 62, 86, 56, 5, hot ? 'E' : 'T'); rect(g, 62, 106, 56, 2, 'K');
+    return g;
+  }
   rect(g, 74, 62, 24, 26, 'W'); rect(g, 74, 62, 24, 2, 'K');
   ell(g, 86, 56, 9, 10, 'K'); ell(g, 86, 56, 8, 9, 'C'); ellC(g, 86, 55, 8, 9, 'Y', 52);
   rect(g, 81, 57, 4, 3, 'K'); rect(g, 88, 57, 4, 3, 'K'); rect(g, 85, 58, 3, 1, 'K');
@@ -413,7 +417,7 @@ function ovJulius(present) {
   rect(g, 98, 74, 10, 12, 'K'); rect(g, 99, 75, 8, 10, 'V'); rect(g, 99, 73, 8, 2, 'B');
   return g;
 }
-function windowCard(hot) {
+function windowCard(hot, noCat) {
   const g = G(180, 110), m = MOOD(hot);
   rect(g, 0, 0, 180, 110, m.wall);
   for (let x = 4; x < 180; x += 16) rect(g, x, 0, 1, 110, m.lo);
@@ -454,8 +458,10 @@ function windowCard(hot) {
   }
 
   rect(g, 2, 80, 176, 12, 'K'); rect(g, 4, 81, 172, 8, m.hi); rect(g, 4, 81, 172, 2, hot ? 'C' : 'W');
-  catProfile(g, 104, 59, 'O', 'L');
-  rect(g, 116, 76, 9, 3, 'K'); rect(g, 117, 76, 8, 2, 'O'); rect(g, 123, 74, 2, 3, 'K');
+  if (!noCat) {
+    catProfile(g, 104, 59, 'O', 'L');
+    rect(g, 116, 76, 9, 3, 'K'); rect(g, 117, 76, 8, 2, 'O'); rect(g, 123, 74, 2, 3, 'K');
+  }
   return g;
 }
 function office() {
@@ -512,24 +518,71 @@ function bar() {
   rect(g, 112, 84, 30, 14, 'W'); rect(g, 112, 84, 30, 1, 'P'); rect(g, 116, 88, 22, 1, 'P'); rect(g, 116, 92, 16, 1, 'P');
   return g;
 }
-function annaFlat() {
+function annaFlat(withCat) {
   const g = G(180, 110);
-  rect(g, 0, 0, 180, 78, 'D'); rect(g, 0, 78, 180, 32, 'K');
-  rect(g, 0, 77, 180, 1, 'S');
-  rect(g, 96, 6, 74, 62, 'K'); rect(g, 100, 10, 66, 54, 'Z'); rect(g, 100, 34, 66, 30, 'S');
-  rect(g, 92, 2, 22, 74, 'K'); rect(g, 94, 4, 18, 70, 'D'); rect(g, 152, 2, 24, 74, 'K'); rect(g, 154, 4, 20, 70, 'D');
-  for (let i = 0; i < 5; i++) { rect(g, 96 + i * 4, 4, 1, 70, 'S'); rect(g, 156 + i * 4, 4, 1, 70, 'S'); }
-  rect(g, 10, 74, 76, 6, 'K'); rect(g, 12, 76, 72, 3, 'D');
-  rect(g, 12, 80, 4, 20, 'K'); rect(g, 80, 80, 4, 20, 'K');
-  [0, 1, 2].forEach(i => { const x = 22 + i * 20; rect(g, x, 66, 13, 9, 'K'); rect(g, x + 1, 67, 11, 7, 'W'); rect(g, x + 4, 69, 5, 4, 'D'); });
-  [92, 100].forEach((x, i) => { rect(g, x - 76, 58 + i * 2, 4, 10, 'W'); rect(g, x - 75, 56 + i * 2, 2, 2, 'K'); });
-  rect(g, 116, 68, 30, 22, 'K'); rect(g, 118, 70, 26, 4, 'S'); rect(g, 118, 74, 4, 16, 'S'); rect(g, 140, 74, 4, 16, 'S');
-  rect(g, 112, 62, 40, 16, 'K'); rect(g, 114, 64, 36, 12, 'D');
-  catProfile(g, 122, 50, 'O', 'L');
-  [[8, 40], [166, 46]].forEach(([x, y], i) => { rect(g, x, y + 12, 10, 12, 'B'); rect(g, x + 3, y, 4, 12, 'G'); rect(g, x - 1, y + 4, 5, 3, 'G'); rect(g, x + 7, y + 6, 5, 3, 'G'); });
-  rect(g, 60, 84, 12, 14, 'B'); rect(g, 62, 80, 8, 6, 'G'); rect(g, 58, 82, 6, 3, 'G');
-  rect(g, 158, 84, 10, 12, 'B'); rect(g, 160, 78, 6, 8, 'G');
-  rect(g, 30, 56, 3, 8, 'W'); px(g, 31, 55, 'A'); rect(g, 60, 58, 3, 6, 'W'); px(g, 61, 57, 'A');
+  rect(g, 0, 0, 180, 84, 'D'); rect(g, 0, 0, 180, 3, 'K'); rect(g, 0, 14, 180, 2, 'S');
+  for (let x = 0; x < 180; x += 12) rect(g, x, 16, 1, 68, 'K');
+  rect(g, 0, 84, 180, 3, 'K'); rect(g, 0, 87, 180, 23, 'B');
+  for (let y = 90; y < 110; y += 4) rect(g, 0, y, 180, 1, 'K');
+
+  rect(g, 116, 18, 56, 50, 'K');
+  rect(g, 119, 21, 50, 44, 'S'); rect(g, 119, 43, 50, 22, 'Z');
+  for (let i = 0; i < 4; i++) { rect(g, 122 + i * 12, 46, 7, 10, 'D'); rect(g, 123 + i * 12, 48, 2, 3, 'A'); }
+  rect(g, 143, 21, 3, 44, 'K'); rect(g, 119, 40, 50, 3, 'K');
+  rect(g, 114, 14, 60, 4, 'K'); rect(g, 115, 15, 58, 2, 'S');
+  rect(g, 112, 16, 12, 54, 'K'); rect(g, 113, 17, 10, 52, 'K');
+  rect(g, 166, 16, 12, 54, 'K'); rect(g, 167, 17, 10, 52, 'K');
+  for (let y = 18; y < 68; y += 5) { rect(g, 114, y, 8, 1, 'D'); rect(g, 168, y, 8, 1, 'D'); }
+  rect(g, 116, 68, 58, 3, 'K'); rect(g, 117, 69, 56, 1, 'S');
+
+  rect(g, 4, 20, 52, 64, 'K'); rect(g, 6, 22, 48, 60, 'B');
+  [22, 38, 54, 70].forEach(sy => rect(g, 5, sy, 50, 3, 'K'));
+  const shelfBooks = (sy, seed) => {
+    let x = 8;
+    while (x < 52) {
+      const w = 3 + Math.floor(rnd(seed + x) * 3), h = 10 + Math.floor(rnd(seed + x + 7) * 3);
+      const c = ['D', 'S', 'M', 'Z', 'N', 'K'][Math.floor(rnd(seed + x + 3) * 6)];
+      rect(g, x, sy - h, w, h, 'K'); rect(g, x, sy - h + 1, w - 1, h - 1, c);
+      if (rnd(seed + x + 11) > 0.7) rect(g, x, sy - h + 3, w - 1, 1, 'C');
+      x += w + 1;
+    }
+  };
+  shelfBooks(38, 3); shelfBooks(54, 21); shelfBooks(70, 44);
+  rect(g, 10, 26, 8, 10, 'K'); rect(g, 11, 27, 6, 8, 'N');
+  ell(g, 30, 30, 5, 5, 'K'); ell(g, 30, 30, 4, 4, 'S'); px(g, 29, 29, 'P');
+  rect(g, 42, 26, 7, 10, 'K'); rect(g, 43, 27, 5, 8, 'G'); rect(g, 44, 24, 3, 3, 'G');
+
+  rect(g, 62, 52, 44, 34, 'K'); rect(g, 64, 54, 40, 30, 'S');
+  rect(g, 62, 52, 44, 6, 'K'); rect(g, 64, 53, 40, 4, 'D');
+  rect(g, 58, 60, 8, 26, 'K'); rect(g, 59, 61, 6, 24, 'S');
+  rect(g, 102, 60, 8, 26, 'K'); rect(g, 103, 61, 6, 24, 'S');
+  rect(g, 64, 74, 40, 10, 'K'); rect(g, 65, 75, 38, 8, 'T');
+  rect(g, 66, 86, 5, 8, 'K'); rect(g, 98, 86, 5, 8, 'K');
+  rect(g, 68, 56, 34, 20, 'K'); rect(g, 69, 57, 32, 18, 'K');
+  rect(g, 69, 57, 32, 2, 'S'); rect(g, 76, 59, 2, 15, 'S'); rect(g, 90, 59, 2, 15, 'S');
+  rect(g, 66, 70, 12, 14, 'K'); rect(g, 67, 71, 10, 12, 'K'); rect(g, 67, 71, 10, 1, 'S');
+  px(g, 72, 64, 'P'); px(g, 84, 66, 'P');
+
+  if (withCat) {
+    ell(g, 84, 62, 11, 6, 'K'); ell(g, 84, 62, 10, 5, 'O'); ell(g, 84, 64, 8, 3, 'L');
+    rect(g, 78, 54, 3, 5, 'K'); rect(g, 88, 54, 3, 5, 'K'); rect(g, 78, 55, 2, 4, 'O'); rect(g, 88, 55, 2, 4, 'O');
+    ell(g, 84, 57, 6, 4, 'K'); ell(g, 84, 57, 5, 3, 'O');
+    rect(g, 81, 57, 2, 1, 'K'); rect(g, 86, 57, 2, 1, 'K');
+    rect(g, 94, 62, 5, 2, 'K'); rect(g, 94, 62, 4, 1, 'O');
+  }
+
+  rect(g, 30, 88, 74, 5, 'K'); rect(g, 31, 89, 72, 3, 'B'); rect(g, 31, 89, 72, 1, 'N');
+  rect(g, 34, 93, 4, 14, 'K'); rect(g, 96, 93, 4, 14, 'K');
+  [0, 1, 2, 3].forEach(i => { const x = 38 + i * 13; rect(g, x, 82, 9, 7, 'K'); rect(g, x + 1, 83, 7, 5, i === 2 ? 'W' : 'D'); if (i === 2) rect(g, x + 3, 84, 3, 3, 'K'); });
+  rect(g, 92, 82, 8, 7, 'K'); rect(g, 93, 83, 6, 5, 'W'); rect(g, 94, 84, 4, 3, 'D');
+  rect(g, 86, 78, 4, 6, 'K'); rect(g, 87, 79, 2, 5, 'W'); px(g, 88, 77, 'A'); px(g, 88, 76, 'C');
+  ell(g, 44, 80, 5, 3, 'K'); ell(g, 44, 79, 4, 2, 'P'); px(g, 44, 78, 'N');
+
+  rect(g, 150, 84, 14, 20, 'K'); rect(g, 151, 85, 12, 18, 'B');
+  rect(g, 155, 72, 3, 13, 'G'); rect(g, 150, 74, 5, 3, 'G'); rect(g, 158, 78, 5, 3, 'G'); rect(g, 152, 80, 4, 3, 'G');
+  rect(g, 122, 74, 3, 12, 'K'); rect(g, 116, 86, 15, 3, 'K');
+  rect(g, 117, 66, 13, 8, 'K'); rect(g, 118, 67, 11, 6, 'C'); rect(g, 118, 72, 11, 1, 'A');
+  for (let i = 0; i < 5; i++) px(g, 119 + i * 3, 76 + (i % 2), 'A');
   return g;
 }
 function tarot(kind) {
@@ -541,9 +594,62 @@ function tarot(kind) {
   if (kind === 'cups') { [[6, 14], [16, 14], [11, 24]].forEach(([x, y]) => { rect(g, x - 3, y, 7, 6, I); rect(g, x - 1, y + 6, 3, 3, I); rect(g, x - 3, y + 9, 7, 2, I); }); }
   if (kind === 'hierophant') { rect(g, 9, 6, 6, 8, I); rect(g, 7, 14, 10, 4, I); rect(g, 6, 18, 12, 16, I); rect(g, 11, 22, 2, 8, 'W'); rect(g, 9, 25, 6, 2, 'W'); }
   if (kind === 'pentacles') { for (let i = 0; i < 8; i++) { const x = 6 + (i % 2) * 11, y = 8 + Math.floor(i / 2) * 8; ell(g, x, y, 3, 3, I); ell(g, x, y, 1, 1, 'W'); } }
-  if (kind === 'devil') { rect(g, 7, 12, 10, 12, I); rect(g, 4, 6, 3, 7, I); rect(g, 17, 6, 3, 7, I); rect(g, 9, 15, 2, 2, 'W'); rect(g, 13, 15, 2, 2, 'W'); rect(g, 8, 26, 8, 8, I); }
+  if (kind === 'devil') {
+    for (let i = 0; i < 6; i++) { px(g, 6 + i, 12 - i, I); px(g, 18 - i, 12 - i, I); }
+    ell(g, 12, 15, 5, 5, I); rect(g, 10, 14, 2, 2, 'W'); rect(g, 14, 14, 2, 2, 'W'); px(g, 12, 17, 'W');
+    rect(g, 9, 22, 7, 1, I); rect(g, 9, 22, 1, 8, I); rect(g, 15, 22, 1, 8, I); rect(g, 9, 29, 7, 1, I);
+    rect(g, 6, 24, 3, 1, I); rect(g, 16, 24, 3, 1, I);
+    rect(g, 5, 33, 15, 2, I); rect(g, 11, 31, 1, 2, I); rect(g, 13, 31, 1, 2, I);
+  }
   if (kind === 'wheel') { ell(g, 12, 20, 9, 9, I); ell(g, 12, 20, 6, 6, 'W'); ell(g, 12, 20, 2, 2, I); for (let a = 0; a < 8; a++) { const r = a / 8 * 6.28; px(g, 12 + Math.round(Math.cos(r) * 7), 20 + Math.round(Math.sin(r) * 7), I); } }
   if (kind === 'fool') { rect(g, 10, 8, 5, 6, I); rect(g, 8, 14, 9, 12, I); rect(g, 6, 26, 4, 8, I); rect(g, 14, 26, 4, 8, I); rect(g, 16, 12, 4, 3, I); rect(g, 4, 28, 4, 4, I); }
+  if (kind === 'magician') { rect(g, 10, 10, 5, 6, I); rect(g, 8, 16, 9, 12, I); rect(g, 5, 20, 4, 3, I); rect(g, 16, 20, 4, 3, I); rect(g, 17, 8, 2, 13, I); rect(g, 15, 6, 6, 2, I); rect(g, 7, 28, 11, 2, I); rect(g, 11, 6, 3, 2, I); }
+  if (kind === 'priestess') { rect(g, 6, 8, 3, 26, I); rect(g, 16, 8, 3, 26, I); rect(g, 11, 12, 4, 5, I); rect(g, 9, 17, 8, 15, I); rect(g, 11, 8, 4, 3, I); ell(g, 12, 30, 3, 2, 'W'); rect(g, 5, 6, 15, 2, I); }
+  if (kind === 'empress') { ell(g, 12, 12, 4, 4, I); rect(g, 8, 16, 9, 8, I); rect(g, 6, 24, 13, 10, I); rect(g, 9, 6, 2, 4, I); rect(g, 13, 6, 2, 4, I); rect(g, 10, 8, 5, 2, I); rect(g, 4, 30, 17, 2, I); for (let i = 0; i < 3; i++) px(g, 8 + i * 4, 28, 'W'); }
+  if (kind === 'strength') {
+    ell(g, 8, 9, 4, 4, I); ell(g, 8, 9, 2, 2, 'W');
+    rect(g, 6, 15, 5, 1, I); rect(g, 6, 15, 1, 12, I); rect(g, 10, 15, 1, 12, I); rect(g, 6, 26, 5, 1, I);
+    rect(g, 11, 18, 3, 1, I);
+    ell(g, 15, 24, 7, 7, I); ell(g, 15, 24, 5, 5, 'W');
+    ell(g, 15, 24, 4, 4, I); ell(g, 15, 24, 3, 3, 'W');
+    px(g, 13, 23, I); px(g, 17, 23, I); rect(g, 14, 26, 3, 1, I);
+    rect(g, 5, 34, 14, 2, I);
+  }
+  if (kind === 'hermit') {
+    ellC(g, 13, 13, 4, 5, I, 13); rect(g, 11, 13, 5, 2, I);
+    rect(g, 10, 16, 2, 15, I); rect(g, 16, 16, 2, 15, I);
+    for (let i = 0; i < 4; i++) px(g, 12 + i, 16 - (i > 1 ? 1 : 0), I);
+    rect(g, 9, 31, 10, 2, I);
+    rect(g, 13, 21, 3, 1, I); rect(g, 13, 25, 3, 1, I);
+    rect(g, 18, 10, 2, 23, I);
+    rect(g, 4, 20, 5, 1, I); rect(g, 4, 26, 5, 1, I); rect(g, 4, 20, 1, 7, I); rect(g, 8, 20, 1, 7, I);
+    rect(g, 6, 22, 1, 3, I); px(g, 6, 18, I); px(g, 6, 17, I);
+  }
+  if (kind === 'lovers') { ell(g, 8, 14, 3, 3, I); rect(g, 6, 18, 5, 14, I); ell(g, 16, 14, 3, 3, I); rect(g, 14, 18, 5, 14, I); rect(g, 10, 20, 5, 2, I); rect(g, 9, 6, 3, 3, I); rect(g, 13, 6, 3, 3, I); rect(g, 10, 9, 5, 3, I); }
+  if (kind === 'chariot') {
+    ell(g, 12, 10, 3, 3, I); rect(g, 11, 14, 3, 5, I); rect(g, 8, 15, 2, 2, I); rect(g, 15, 15, 2, 2, I);
+    rect(g, 5, 21, 15, 2, I); rect(g, 5, 21, 2, 8, I); rect(g, 18, 21, 2, 8, I); rect(g, 5, 27, 15, 2, I);
+    rect(g, 11, 24, 3, 3, I);
+    ell(g, 7, 34, 4, 4, I); ell(g, 7, 34, 2, 2, 'W');
+    ell(g, 17, 34, 4, 4, I); ell(g, 17, 34, 2, 2, 'W');
+  }
+  if (kind === 'justice') { rect(g, 11, 6, 3, 26, I); rect(g, 4, 12, 17, 2, I); rect(g, 4, 14, 2, 6, I); rect(g, 19, 14, 2, 6, I); rect(g, 3, 20, 5, 3, I); rect(g, 18, 20, 5, 3, I); rect(g, 7, 32, 11, 3, I); }
+  if (kind === 'hanged') { rect(g, 4, 6, 17, 2, I); rect(g, 12, 8, 2, 8, I); rect(g, 9, 16, 7, 5, I); rect(g, 10, 21, 5, 8, I); rect(g, 8, 29, 4, 3, I); rect(g, 13, 29, 4, 6, I); rect(g, 6, 22, 4, 2, I); rect(g, 16, 22, 4, 2, I); }
+  if (kind === 'death') { ell(g, 12, 12, 5, 5, I); rect(g, 9, 11, 2, 2, 'W'); rect(g, 14, 11, 2, 2, 'W'); rect(g, 10, 15, 5, 1, 'W'); rect(g, 8, 17, 9, 12, I); rect(g, 6, 29, 13, 3, I); rect(g, 18, 6, 2, 26, I); rect(g, 14, 6, 6, 2, I); }
+  if (kind === 'temperance') {
+    ell(g, 12, 7, 5, 4, I); ell(g, 12, 7, 3, 2, 'W');
+    rect(g, 4, 13, 7, 1, I); rect(g, 4, 13, 1, 5, I); rect(g, 10, 13, 1, 5, I); rect(g, 5, 18, 6, 1, I);
+    rect(g, 7, 19, 1, 3, I); rect(g, 5, 22, 5, 1, I);
+    for (let i = 0; i < 5; i++) px(g, 11 + i, 20 + i, I);
+    rect(g, 12, 27, 7, 1, I); rect(g, 12, 27, 1, 5, I); rect(g, 18, 27, 1, 5, I); rect(g, 13, 32, 6, 1, I);
+    rect(g, 15, 33, 1, 3, I); rect(g, 13, 36, 5, 1, I);
+  }
+  if (kind === 'star') { for (let a = 0; a < 8; a++) { const r = a / 8 * 6.28; for (let d = 2; d < 9; d++) px(g, 12 + Math.round(Math.cos(r) * d), 14 + Math.round(Math.sin(r) * d), I); } ell(g, 12, 14, 3, 3, 'W'); [6, 18].forEach(sx => { for (let a = 0; a < 4; a++) { const r = a / 4 * 6.28; for (let d = 1; d < 4; d++) px(g, sx + Math.round(Math.cos(r) * d), 28 + Math.round(Math.sin(r) * d), I); } }); rect(g, 4, 34, 17, 2, I); }
+  if (kind === 'moon') { ell(g, 13, 14, 9, 9, I); ell(g, 17, 12, 7, 7, 'W'); rect(g, 6, 26, 3, 8, I); rect(g, 16, 26, 3, 8, I); rect(g, 5, 24, 5, 3, I); rect(g, 15, 24, 5, 3, I); rect(g, 4, 34, 17, 2, I); for (let i = 0; i < 4; i++) px(g, 10 + i * 2, 30 + (i % 2), I); }
+  if (kind === 'sun') { ell(g, 12, 12, 6, 6, I); ell(g, 12, 12, 4, 4, 'W'); for (let a = 0; a < 12; a++) { const r = a / 12 * 6.28; px(g, 12 + Math.round(Math.cos(r) * 8), 12 + Math.round(Math.sin(r) * 8), I); px(g, 12 + Math.round(Math.cos(r) * 9), 12 + Math.round(Math.sin(r) * 9), I); } ell(g, 12, 26, 3, 3, I); rect(g, 9, 29, 7, 5, I); rect(g, 4, 34, 17, 2, I); }
+  if (kind === 'world') { for (let a = 0; a < 20; a++) { const r = a / 20 * 6.28; px(g, 12 + Math.round(Math.cos(r) * 9), 20 + Math.round(Math.sin(r) * 11), I); px(g, 12 + Math.round(Math.cos(r) * 8), 20 + Math.round(Math.sin(r) * 10), I); } ell(g, 12, 18, 3, 4, I); rect(g, 10, 22, 5, 7, I); [[5, 6], [18, 6], [5, 33], [18, 33]].forEach(([sx, sy]) => rect(g, sx, sy, 3, 3, I)); }
+  if (kind === 'swords') { for (let i = 0; i < 3; i++) { const sx = 7 + i * 5; rect(g, sx, 8, 2, 20, I); rect(g, sx - 2, 26, 6, 2, I); px(g, sx, 6, I); } ell(g, 12, 20, 7, 6, 'W'); for (let i = 0; i < 3; i++) rect(g, 7 + i * 5, 14, 2, 12, I); rect(g, 6, 32, 13, 3, I); }
+  if (kind === 'ace') { rect(g, 7, 16, 11, 8, I); rect(g, 10, 24, 5, 4, I); rect(g, 7, 28, 11, 3, I); rect(g, 9, 12, 7, 4, 'W'); rect(g, 9, 12, 7, 1, I); rect(g, 11, 6, 3, 6, I); rect(g, 9, 6, 7, 2, I); }
   if (kind === 'back') { for (let y = 4; y < 36; y += 4) for (let x = 4; x < 20; x += 4) rect(g, x, y, 2, 2, I); rect(g, 3, 3, 18, 1, I); rect(g, 3, 36, 18, 1, I); }
   return g;
 }
@@ -583,37 +689,166 @@ function booking(active) {
 }
 function uzbek(variant) {
   const g = G(180, 110);
-  rect(g, 0, 0, 180, 60, 'A'); rect(g, 0, 0, 180, 18, 'C');
-  ell(g, 150, 34, 14, 14, 'C'); ell(g, 150, 34, 11, 11, 'A');
-  ellC(g, 62, 46, 27, 27, 'C', 46); ellC(g, 62, 46, 25, 25, 'Z', 46);
-  for (let y = 20; y <= 46; y++) for (let x = 36; x <= 88; x++) if (g.d[y * 180 + x] === 'Z' && (x - 62) % 6 === 0) px(g, x, y, 'A');
-  rect(g, 60, 12, 4, 9, 'A'); px(g, 61, 10, 'C');
-  rect(g, 36, 46, 52, 22, 'Z'); rect(g, 36, 46, 52, 2, 'C');
-  for (let x = 40; x < 86; x += 8) rect(g, x, 50, 4, 4, 'C');
-  ell(g, 62, 60, 13, 16, 'K'); ell(g, 62, 61, 11, 15, 'D');
-  rect(g, 0, 60, 180, 8, 'N'); rect(g, 0, 66, 180, 44, 'B');
-  rect(g, 0, 66, 180, 2, 'K');
-  for (let y = 72; y < 110; y += 6) rect(g, 0, y, 180, 1, 'N');
-  rect(g, 14, 44, 20, 24, 'Z'); rect(g, 146, 44, 20, 24, 'Z');
-  rect(g, 30, 82, 120, 6, 'K'); rect(g, 32, 83, 116, 3, 'W');
-  rect(g, 38, 88, 5, 20, 'W'); rect(g, 138, 88, 5, 20, 'W');
+
+  // --- sky: banded late sun, palest at the horizon ---
+  rect(g, 0, 0, 180, 12, 'N');
+  rect(g, 0, 12, 180, 10, 'E');
+  rect(g, 0, 22, 180, 12, 'A');
+  rect(g, 0, 34, 180, 16, 'C');
+  rect(g, 0, 50, 180, 8, 'W');
+  for (let x = 0; x < 180; x += 2) { px(g, x, 11, 'E'); px(g, x + 1, 21, 'A'); px(g, x, 33, 'C'); px(g, x + 1, 49, 'W'); }
+
+  // low sun sitting just above the rooftops, left of the dome
+  ell(g, 22, 50, 11, 11, 'W'); ell(g, 22, 50, 8, 8, 'C');
+  for (let i = 0; i < 7; i++) rect(g, 8 + i * 4, 46 + (i % 2) * 3, 3, 1, 'W');
+
+  // birds
+  [[132, 16], [140, 12], [147, 19], [118, 22]].forEach(([bx, by]) => { px(g, bx, by, 'B'); px(g, bx + 1, by - 1, 'B'); px(g, bx + 2, by, 'B'); px(g, bx - 1, by - 1, 'B'); });
+
+  // --- distant city silhouette behind the madrasa ---
+  for (let i = 0; i < 9; i++) {
+    const bx = i * 21, bh = 8 + ((i * 7) % 11), by = 58 - bh;
+    rect(g, bx, by, 19, bh, 'N'); rect(g, bx, by, 19, 1, 'C');
+    for (let w = 2; w < 17; w += 5) rect(g, bx + w, by + 3, 2, 2, 'B');
+  }
+
+  // ================= the madrasa =================
+  // flanking wings
+  const wing = (x) => {
+    rect(g, x, 40, 26, 26, 'Z'); rect(g, x, 40, 26, 2, 'C'); rect(g, x, 40, 1, 26, 'C');
+    rect(g, x + 25, 40, 1, 26, 'K');
+    for (let i = 0; i < 2; i++) {
+      const ax = x + 4 + i * 12;
+      rect(g, ax, 50, 8, 16, 'K');
+      ellC(g, ax + 4, 51, 4, 6, 'K', 51);
+      rect(g, ax + 1, 52, 6, 14, 'D'); ellC(g, ax + 4, 52, 3, 5, 'D', 52);
+      rect(g, ax + 2, 56, 4, 1, 'S');
+    }
+    for (let i = 0; i < 4; i++) rect(g, x + 3 + i * 6, 44, 4, 4, 'C');
+    for (let i = 0; i < 4; i++) rect(g, x + 4 + i * 6, 45, 2, 2, 'Z');
+  };
+  wing(6); wing(148);
+
+  // minarets
+  const minaret = (x) => {
+    rect(g, x, 24, 10, 42, 'C'); rect(g, x, 24, 1, 42, 'W'); rect(g, x + 9, 24, 1, 42, 'N');
+    for (let y = 28; y < 64; y += 5) { rect(g, x, y, 10, 1, 'Z'); rect(g, x + 2, y + 2, 2, 1, 'Z'); rect(g, x + 6, y + 2, 2, 1, 'Z'); }
+    rect(g, x - 2, 20, 14, 4, 'K'); rect(g, x - 1, 21, 12, 2, 'C');
+    rect(g, x + 1, 14, 8, 6, 'Z'); rect(g, x + 1, 14, 8, 1, 'C');
+    ellC(g, x + 5, 14, 5, 6, 'Z', 14);
+    rect(g, x + 4, 6, 2, 4, 'A'); px(g, x + 5, 5, 'C');
+    rect(g, x + 2, 16, 2, 2, 'A');
+  };
+  minaret(34); minaret(136);
+
+  // central iwan block
+  rect(g, 54, 30, 72, 36, 'Z');
+  rect(g, 54, 30, 72, 2, 'C'); rect(g, 54, 30, 2, 36, 'C'); rect(g, 124, 30, 2, 36, 'K');
+  // tiled band along the top of the block
+  for (let x = 58; x < 124; x += 8) { rect(g, x, 34, 6, 5, 'C'); rect(g, x + 1, 35, 4, 3, 'A'); px(g, x + 2, 36, 'Z'); }
+  // the pointed portal arch
+  rect(g, 70, 48, 40, 18, 'K');
+  ellC(g, 90, 50, 20, 20, 'K', 50);
+  rect(g, 72, 50, 36, 16, 'D');
+  ellC(g, 90, 51, 18, 18, 'D', 51);
+  // muqarnas suggestion inside the arch head
+  for (let r = 0; r < 3; r++) for (let i = 0; i <= r * 2 + 2; i++) {
+    px(g, 90 - (r + 1) * 3 + i * 3, 40 + r * 4, 'S');
+  }
+  rect(g, 74, 60, 32, 1, 'S');
+  // spandrel tilework either side of the arch
+  [62, 112].forEach(sx => { rect(g, sx, 42, 8, 8, 'C'); rect(g, sx + 1, 43, 6, 6, 'A'); rect(g, sx + 2, 44, 4, 4, 'Z'); px(g, sx + 3, 45, 'C'); });
+
+  // the dome on its drum
+  rect(g, 78, 24, 24, 8, 'C'); rect(g, 78, 24, 24, 1, 'W');
+  for (let x = 80; x < 102; x += 4) rect(g, x, 26, 2, 4, 'Z');
+  ellC(g, 90, 24, 20, 22, 'C', 24);
+  ellC(g, 90, 24, 18, 20, 'Z', 24);
+  // ribs
+  for (let i = -3; i <= 3; i++) {
+    const rx = 90 + i * 5;
+    for (let y = 4; y <= 24; y++) {
+      const half = Math.round(18 * Math.sqrt(Math.max(0, 1 - ((y - 24) * (y - 24)) / 400)));
+      if (Math.abs(rx - 90) <= half - 1) px(g, rx, y, 'C');
+    }
+  }
+  ellC(g, 90, 22, 8, 9, 'C', 22);
+  rect(g, 89, 0, 3, 5, 'A'); px(g, 90, 0, 'C');
+  ell(g, 90, 5, 3, 3, 'A');
+
+  // --- ground: packed dust, long shadows toward the viewer ---
+  rect(g, 0, 66, 180, 6, 'N'); rect(g, 0, 66, 180, 1, 'C');
+  rect(g, 0, 72, 180, 38, 'B');
+  for (let y = 74; y < 110; y += 5) for (let x = (y % 10); x < 180; x += 7) px(g, x, y, 'N');
+  // building shadows falling to the right
+  rect(g, 126, 66, 30, 5, 'K'); rect(g, 146, 66, 18, 8, 'K');
+  for (let i = 0; i < 26; i++) px(g, 130 + i, 71 + Math.floor(i / 6), 'K');
+  // a low wall and a vine at the left edge
+  rect(g, 0, 60, 16, 12, 'N'); rect(g, 0, 60, 16, 1, 'C');
+  for (let i = 0; i < 5; i++) { px(g, 2 + i * 3, 58 - (i % 2), 'G'); px(g, 3 + i * 3, 59, 'G'); }
+
+  // ================= the table =================
+  // cloth with a woven border
+  rect(g, 28, 80, 124, 8, 'K');
+  rect(g, 29, 81, 122, 6, 'W');
+  rect(g, 29, 81, 122, 1, 'C');
+  for (let x = 32; x < 148; x += 6) { px(g, x, 86, 'M'); px(g, x + 2, 86, 'Z'); px(g, x + 4, 86, 'M'); }
+  rect(g, 29, 88, 122, 4, 'P'); rect(g, 29, 88, 122, 1, 'S');
+  for (let x = 34; x < 148; x += 8) rect(g, x, 89, 3, 3, 'W');
+  rect(g, 36, 92, 5, 16, 'N'); rect(g, 36, 92, 1, 16, 'C');
+  rect(g, 139, 92, 5, 16, 'N'); rect(g, 139, 92, 1, 16, 'C');
+  rect(g, 32, 106, 116, 2, 'K');
+
   const plate = (x) => {
-    ell(g, x, 79, 17, 5, 'K'); ell(g, x, 78, 15, 4, 'P');
-    ell(g, x, 77, 12, 3, 'C'); rect(g, x - 6, 74, 12, 3, 'N'); rect(g, x - 3, 73, 6, 2, 'B');
-    ell(g, x + 8, 76, 3, 2, 'W'); ell(g, x - 9, 76, 3, 2, 'W'); px(g, x - 9, 76, 'C');
+    ell(g, x, 79, 18, 5, 'K');
+    ell(g, x, 78, 16, 4, 'P'); ell(g, x, 78, 16, 1, 'W');
+    ell(g, x, 77, 13, 3, 'C');
+    // plov: rice mound, carrot strands, lamb, a whole garlic
+    ell(g, x, 75, 11, 4, 'C'); ell(g, x, 74, 9, 3, 'W');
+    for (let i = -3; i <= 3; i++) rect(g, x + i * 3 - 1, 74 - (i % 2), 3, 1, 'A');
+    rect(g, x - 5, 72, 4, 2, 'B'); rect(g, x + 2, 71, 4, 2, 'B'); px(g, x - 4, 71, 'N');
+    ell(g, x - 1, 70, 3, 2, 'W'); px(g, x - 1, 69, 'C');
+    for (let i = 0; i < 5; i++) px(g, x - 6 + i * 3, 76, 'G');
+    // shadow under the rim
+    rect(g, x - 9, 82, 18, 1, 'S');
   };
+  const teapot = (x) => {
+    ell(g, x, 76, 6, 5, 'K'); ell(g, x, 76, 5, 4, 'W');
+    rect(g, x - 2, 74, 5, 1, 'Z'); rect(g, x - 1, 78, 3, 1, 'Z');
+    rect(g, x - 2, 70, 4, 3, 'K'); rect(g, x - 1, 71, 2, 2, 'W');
+    px(g, x, 69, 'Z');
+    rect(g, x + 5, 73, 3, 1, 'K'); rect(g, x + 6, 72, 1, 2, 'K');
+    rect(g, x - 8, 73, 3, 4, 'K'); rect(g, x - 7, 74, 1, 2, 'W');
+  };
+  const bowl = (x, y) => { ell(g, x, y, 5, 3, 'K'); ell(g, x, y - 1, 4, 2, 'W'); px(g, x, y - 2, 'Z'); };
+  const bread = (x, y) => { ell(g, x, y, 7, 4, 'K'); ell(g, x, y - 1, 6, 3, 'N'); ell(g, x, y - 1, 3, 2, 'B'); px(g, x - 3, y - 1, 'C'); px(g, x + 3, y - 1, 'C'); };
   const chair = (x, occupied) => {
-    rect(g, x, 68, 22, 18, 'K'); rect(g, x + 1, 69, 20, 16, 'W');
-    rect(g, x + 5, 71, 2, 12, 'P'); rect(g, x + 10, 71, 2, 12, 'P'); rect(g, x + 15, 71, 2, 12, 'P');
+    rect(g, x, 66, 22, 20, 'K'); rect(g, x + 1, 67, 20, 18, 'W');
+    rect(g, x + 4, 69, 2, 14, 'P'); rect(g, x + 10, 69, 2, 14, 'P'); rect(g, x + 16, 69, 2, 14, 'P');
+    rect(g, x + 1, 67, 20, 1, 'C');
     rect(g, x - 1, 86, 24, 4, 'K'); rect(g, x, 87, 22, 2, 'W');
-    rect(g, x + 2, 90, 3, 16, 'W'); rect(g, x + 17, 90, 3, 16, 'W');
-    if (occupied) { rect(g, x - 2, 64, 26, 24, 'D'); rect(g, x - 2, 64, 26, 2, 'K'); ell(g, x + 11, 58, 8, 8, 'K'); ell(g, x + 11, 58, 7, 7, 'N'); ellC(g, x + 11, 57, 7, 7, 'H', 55); rect(g, x - 4, 74, 4, 12, 'D'); rect(g, x + 22, 74, 4, 12, 'D'); }
+    rect(g, x + 2, 90, 3, 18, 'W'); rect(g, x + 1, 90, 1, 18, 'N');
+    rect(g, x + 17, 90, 3, 18, 'W'); rect(g, x + 19, 90, 1, 18, 'N');
+    rect(g, x - 2, 107, 26, 2, 'K');
+    if (occupied) {
+      rect(g, x - 3, 62, 28, 26, 'D'); rect(g, x - 3, 62, 28, 2, 'K');
+      rect(g, x + 2, 64, 18, 1, 'S');
+      ell(g, x + 11, 56, 8, 8, 'K'); ell(g, x + 11, 56, 7, 7, 'N'); ellC(g, x + 11, 55, 7, 7, 'H', 53);
+      rect(g, x - 6, 72, 5, 14, 'D'); rect(g, x - 6, 84, 6, 3, 'N');
+      rect(g, x + 24, 72, 5, 14, 'D'); rect(g, x + 24, 84, 6, 3, 'N');
+    }
   };
-  if (variant === 'a') { chair(20, true); chair(138, true); plate(58); plate(112); }
-  else if (variant === 'b') { chair(20, false); chair(138, false); plate(58); plate(112); }
-  else if (variant === 'c') { chair(78, false); plate(88); for (let i = 0; i < 40; i++) rect(g, Math.floor(rnd(i) * 178), Math.floor(rnd(i + 7) * 100), 2, 3, ['M', 'A', 'Z', 'W', 'R'][i % 5]); }
-  else { chair(20, false); chair(138, false); plate(88); }
-  for (let i = 0; i < 30; i++) px(g, Math.floor(rnd(i + 3) * 180), 20 + Math.floor(rnd(i + 60) * 70), 'C');
+
+  if (variant === 'a') { chair(20, true); chair(138, true); plate(58); plate(112); teapot(90); bread(90, 92); bowl(76, 92); bowl(104, 92); }
+  else if (variant === 'b') { chair(20, false); chair(138, false); plate(58); plate(112); teapot(90); bread(90, 92); bowl(76, 92); bowl(104, 92); }
+  else if (variant === 'c') {
+    chair(78, false); plate(88); teapot(120); bread(56, 92); bowl(66, 92);
+    for (let i = 0; i < 40; i++) rect(g, Math.floor(rnd(i) * 178), Math.floor(rnd(i + 7) * 100), 2, 3, ['M', 'A', 'Z', 'W', 'R'][i % 5]);
+  }
+  else { chair(20, false); chair(138, false); plate(88); teapot(60); bread(120, 92); bowl(108, 92); }
+
+  // dust hanging in the light
+  for (let i = 0; i < 34; i++) px(g, Math.floor(rnd(i + 3) * 180), 24 + Math.floor(rnd(i + 60) * 60), 'C');
   return g;
 }
 function airport() {
@@ -875,7 +1110,7 @@ function planeDescent() {
   for (let i = 0; i < 5; i++) mput(wx + 4 + i * 18, wy + 70, 14, 4, 'B');
   for (let i = 0; i < 26; i++) { const x = wx - 4 + i * 4, y = wy + 44 + Math.round(Math.sin(i / 3.2) * 14); mput(x, y, 5, 4, 'Z'); mput(x, y + 4, 4, 1, 'P'); }
   for (let i = 0; i < 9; i++) mput(wx + 62 + (i % 3) * 11, wy + 58 + Math.floor(i / 3) * 11, 9, 9, 'S');
-  mput(wx + 58, wy + 56, 40, 2, 'A');
+  mput(wx + 62, wy + 56, 31, 2, 'A');
   for (let i = 0; i < 9; i++) mput(wx + 64 + (i % 3) * 11, wy + 60 + Math.floor(i / 3) * 11, 3, 3, 'A');
   rect(g, 8, 96, 104, 12, 'S'); rect(g, 8, 96, 104, 2, 'T');
   return g;
@@ -906,14 +1141,37 @@ function dinnerTable(variant) {
     if (p.aino) { rect(g, x + 11, y + 12, 8, 3, 'K'); rect(g, x + 12, y + 13, 6, 1, 'W'); }
     else if (eating) { rect(g, x + 13, y + 12, 4, 2, 'B'); }
     else { rect(g, x + 12, y + 13, 6, 1, 'B'); }
-    if (p.jar) { rect(g, x + 24, y + 2, 9, 12, 'K'); rect(g, x + 25, y + 3, 7, 10, 'V'); rect(g, x + 25, y + 1, 7, 2, 'B'); }
+    if (p.jar) { rect(g, x + 25, y + 18, 5, 12, 'K'); rect(g, x + 26, y + 19, 3, 11, p.shirt); rect(g, x + 24, y + 14, 6, 6, 'K'); rect(g, x + 25, y + 15, 4, 4, 'C'); rect(g, x + 22, y + 2, 10, 13, 'K'); rect(g, x + 23, y + 3, 8, 11, 'V'); rect(g, x + 23, y + 1, 8, 2, 'B'); rect(g, x + 24, y + 5, 3, 6, 'C'); }
   });
-  rect(g, 66, 44, 10, 24, 'K'); rect(g, 67, 45, 8, 22, 'G'); rect(g, 68, 39, 6, 6, 'K'); rect(g, 69, 40, 4, 5, 'G'); rect(g, 67, 52, 8, 6, 'W'); rect(g, 68, 54, 6, 2, 'R');
-  rect(g, 86, 54, 24, 14, 'K'); rect(g, 88, 56, 20, 10, 'A'); rect(g, 90, 51, 16, 4, 'C'); rect(g, 96, 48, 4, 4, 'C');
-  [22, 50, 122, 150].forEach(x => { rect(g, x, 58, 4, 10, 'W'); px(g, x + 1, 56, 'A'); px(g, x + 1, 55, 'C'); rect(g, x - 1, 66, 6, 2, 'S'); });
+  // The table plane is drawn FIRST; every prop then seats its BASE on TABLE_TOP so nothing floats.
+  // Plates occupy centres 22/56/90/124/158 (each +/-11). The dish is 24 wide, so it takes the centre
+  // plate's own slot and that plate is dropped; tall props go only in the clear gaps between plates.
+  const TABLE_TOP = 68;
   rect(g, 0, 64, 180, 4, 'K'); rect(g, 0, 66, 180, 6, 'N'); rect(g, 0, 72, 180, 38, 'B'); rect(g, 0, 71, 180, 1, 'K');
   for (let y = 78; y < 110; y += 7) rect(g, 0, y, 180, 1, 'N');
-  for (let i = 0; i < 5; i++) { const x = 12 + i * 34; if (variant === 'c' && i === 2) { ell(g, x + 10, 68, 8, 4, 'V'); rect(g, x + 2, 71, 17, 1, 'K'); px(g, x + 12, 66, 'R'); continue; } if (variant === 'c' && i === 3) { ell(g, x + 10, 68, 11, 4, 'K'); ell(g, x + 10, 67, 10, 3, 'W'); continue; } ell(g, x + 10, 68, 11, 4, 'K'); ell(g, x + 10, 67, 10, 3, 'W'); ell(g, x + 10, 66, 6, 2, 'N'); }
+
+  const BOTTLE = 69, CANDLES = [38, 106, 140], DISH = 78;
+  rect(g, BOTTLE, TABLE_TOP - 24, 10, 24, 'K'); rect(g, BOTTLE + 1, TABLE_TOP - 23, 8, 22, 'G');
+  rect(g, BOTTLE + 3, TABLE_TOP - 31, 4, 8, 'K'); rect(g, BOTTLE + 4, TABLE_TOP - 30, 2, 7, 'G'); rect(g, BOTTLE + 3, TABLE_TOP - 32, 4, 2, 'B');
+  rect(g, BOTTLE + 1, TABLE_TOP - 16, 8, 7, 'W'); rect(g, BOTTLE + 2, TABLE_TOP - 14, 6, 2, 'R'); rect(g, BOTTLE + 2, TABLE_TOP - 11, 4, 1, 'S');
+  CANDLES.forEach(x => {
+    rect(g, x, TABLE_TOP - 16, 4, 16, 'W'); rect(g, x, TABLE_TOP - 16, 1, 16, 'C');
+    px(g, x + 1, TABLE_TOP - 18, 'A'); px(g, x + 1, TABLE_TOP - 19, 'C'); px(g, x + 2, TABLE_TOP - 17, 'E');
+    rect(g, x - 2, TABLE_TOP - 4, 8, 4, 'K'); rect(g, x - 1, TABLE_TOP - 3, 6, 2, 'S');
+  });
+  if (variant !== 'c') {
+    rect(g, DISH, TABLE_TOP - 10, 24, 10, 'K'); rect(g, DISH + 2, TABLE_TOP - 8, 20, 6, 'A');
+    rect(g, DISH + 3, TABLE_TOP - 14, 18, 4, 'K'); rect(g, DISH + 4, TABLE_TOP - 13, 16, 2, 'C');
+    rect(g, DISH + 10, TABLE_TOP - 17, 4, 3, 'C');
+  } else {
+    ell(g, DISH + 12, TABLE_TOP - 2, 9, 4, 'V'); rect(g, DISH + 3, TABLE_TOP + 1, 19, 1, 'K'); px(g, DISH + 14, TABLE_TOP - 5, 'R');
+  }
+  for (let i = 0; i < 5; i++) {
+    if (i === 2) continue;
+    const x = 12 + i * 34;
+    if (variant === 'c' && i === 3) { ell(g, x + 10, TABLE_TOP, 11, 4, 'K'); ell(g, x + 10, TABLE_TOP - 1, 10, 3, 'W'); continue; }
+    ell(g, x + 10, TABLE_TOP, 11, 4, 'K'); ell(g, x + 10, TABLE_TOP - 1, 10, 3, 'W'); ell(g, x + 10, TABLE_TOP - 2, 6, 2, 'N');
+  }
   if (variant === 'b') { rect(g, 116, 64, 11, 2, 'P'); rect(g, 118, 62, 2, 3, 'P'); rect(g, 122, 62, 2, 3, 'P'); }
   shimmer(g, 20, 20, 140, 14, 'E', 14, 77);
   return g;
@@ -951,7 +1209,12 @@ function standupLaptop(puke) {
     rect(g, x, y, 9, 5, 'T'); rect(g, x, y, 9, 1, 'P'); rect(g, x, y + 4, 9, 1, 'D');
   }
   rect(g, 46, 104, 60, 4, 'T');
-  if (puke) { ell(g, 88, 88, 7, 4, 'V'); rect(g, 82, 91, 13, 1, 'K'); px(g, 90, 86, 'R'); }
+  if (puke) {
+    ell(g, 88, 87, 18, 8, 'K'); ell(g, 88, 87, 17, 7, 'V');
+    ell(g, 84, 85, 8, 4, 'B'); px(g, 92, 84, 'R'); px(g, 86, 90, 'R');
+    rect(g, 70, 92, 12, 2, 'V'); rect(g, 96, 82, 8, 2, 'V'); px(g, 106, 90, 'V'); px(g, 68, 86, 'V');
+    rect(g, 74, 95, 30, 1, 'K');
+  }
   rect(g, 0, 104, 180, 6, 'B');
   return g;
 }
@@ -966,10 +1229,14 @@ function calendar() {
     for (let y = 20; y < 106; y += 12) rect(g, x, y, 21, 1, 'S');
     const bh = 14, by = 34 + c * 2;
     rect(g, x, by, 21, bh, 'Z'); rect(g, x, by, 21, 1, 'P');
-    const tw = 5 + c * 4;
-    rect(g, x + 2, by + 4, Math.min(tw, 17), 2, 'W');
-    if (tw > 17) { rect(g, x + 2, by + 8, Math.min(tw - 15, 17), 2, 'W'); }
-    if (tw > 31) { rect(g, x + 2, by + bh, 21, 2, 'W'); rect(g, x + 2, by + bh + 4, 14, 2, 'W'); }
+    const tw = 6 + c * 9;
+    let left = tw, row = 0;
+    while (left > 0 && row < 5) {
+      const seg = Math.min(left, 17);
+      const yy = by + 3 + row * 4;
+      rect(g, x + 2, yy, seg, 2, yy > by + bh ? 'C' : 'W');
+      left -= seg; row++;
+    }
   }
   return g;
 }
@@ -1013,7 +1280,11 @@ function stairwell() {
   rect(g, x - 3, 25, 4, 13, 'K'); rect(g, x - 2, 26, 3, 11, 'P');
   rect(g, x + 16, 25, 4, 13, 'K'); rect(g, x + 17, 26, 3, 11, 'P');
   rect(g, x + 6, 24, 2, 11, 'M'); rect(g, x + 9, 24, 2, 11, 'M'); rect(g, x + 6, 35, 5, 4, 'W');
-  rect(g, x + 12, 20, 5, 5, 'K'); rect(g, x + 13, 21, 3, 3, 'E'); px(g, x + 14, 22, 'A');
+  rect(g, x + 11, 17, 12, 11, 'K'); rect(g, x + 12, 18, 10, 9, 'W'); rect(g, x + 12, 18, 10, 2, 'P');
+  rect(g, x + 13, 19, 8, 3, 'N'); rect(g, x + 13, 19, 8, 1, 'C'); px(g, x + 15, 20, 'C'); px(g, x + 18, 20, 'C');
+  rect(g, x + 13, 22, 8, 1, 'A'); px(g, x + 12, 23, 'A'); px(g, x + 21, 23, 'A');
+  rect(g, x + 13, 23, 8, 2, 'B'); rect(g, x + 13, 25, 8, 2, 'N');
+  px(g, x + 14, 24, 'G'); px(g, x + 19, 24, 'G');
   rect(g, x + 1, 46, 15, 12, 'K'); rect(g, x + 2, 47, 13, 11, 'S');
   return g;
 }
@@ -1034,7 +1305,7 @@ function toriListings() {
     if (r[0] === 'crock') { rect(g, 11, y + 6, 9, 11, 'B'); rect(g, 10, y + 5, 11, 2, 'N'); }
     rect(g, 28, y + 5, 60, 3, 'P'); rect(g, 28, y + 11, 40, 2, 'T');
     text(g, 146, y + 7, r[1], 'A');
-    rect(g, 141, y + 7, 3, 5, 'A');
+    rect(g, 141, y + 7, 3, 1, 'A'); px(g, 140, y + 8, 'A'); px(g, 140, y + 9, 'A'); px(g, 140, y + 10, 'A'); rect(g, 141, y + 11, 3, 1, 'A'); rect(g, 139, y + 8, 4, 1, 'A'); rect(g, 139, y + 10, 4, 1, 'A');
   });
   return g;
 }
@@ -1046,10 +1317,9 @@ function bathroom() {
   rect(g, 26, 12, 44, 34, 'S'); rect(g, 28, 14, 40, 30, 'K');
   rect(g, 30, 52, 36, 14, 'S'); rect(g, 32, 54, 32, 10, 'D'); rect(g, 46, 46, 3, 7, 'S'); rect(g, 44, 45, 8, 2, 'S');
   rect(g, 120, 0, 4, 96, 'S');
-  rect(g, 124, 0, 12, 96, 'W'); rect(g, 136, 0, 3, 96, 'C');
-  rect(g, 139, 0, 41, 96, 'D'); rect(g, 139, 0, 3, 96, 'S');
-  for (let i = 0; i < 26; i++) px(g, 124 + Math.floor(rnd(i) * 12), 96 + Math.floor(rnd(i + 9) * 12), 'P');
-  rect(g, 124, 96, 14, 4, 'P'); rect(g, 126, 100, 10, 2, 'S');
+  rect(g, 124, 0, 3, 96, 'C'); rect(g, 127, 0, 2, 96, 'P');
+  rect(g, 129, 0, 51, 96, 'D'); rect(g, 129, 0, 2, 96, 'S');
+  rect(g, 124, 96, 4, 9, 'S'); rect(g, 124, 96, 3, 5, 'T');
   return g;
 }
 function ceiling(stain) {
@@ -1079,15 +1349,30 @@ function shiftAll(g, dx) {
   return n;
 }
 function dither(g, keep) { const n = copyG(g); for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) if ((x * 3 + y * 5) % 4 >= keep) n.d[y * g.w + x] = '.'; return n; }
+const CAT_SIDE = [
+  '..KK..KK................','..KOK.KOK...............','.KOOK.KOOK..............','.KOLOKKOLOK.............',
+  '.KOLOOOOLOK.............','.KOOOOOOOOK.............','.KOAKOOOOOK.............','KOOKOOOOOOKKKKKKKKKK....',
+  'KOLLOOOOOOOOOOOOOOOOK...','KOLLLOOOOOOOOOOOOOOOOK..','.KOOOOOOOOOOOOOOOOOOOK..','.KOLLLLLLLLLLLLLLLLOOK..',
+  '.KOLLLLLLLLLLLLLLLLLOK..','..KOOOOOOOOOOOOOOOOOOK..','..KKOOOOOOOOOOOOOOOOKK..','...KKKKKKKKKKKKKKKKKK...',
+  '........................','........................','........................','........................',
+  '........................','........................','........................','........................'
+];
 function catSide(frame, pose) {
-  const g = G(24, 24);
-  const bob = pose === 'walk' ? [0, 1, 0, 1][frame] : 0;
-  catProfile(g, 2, 1 + bob, 'O', 'L');
-  if (pose === 'walk') {
-    const legs = [[[4, 0], [9, 2], [13, 0], [17, 2]], [[5, 2], [10, 0], [14, 2], [18, 0]], [[6, 1], [11, 1], [15, 1], [19, 1]], [[4, 2], [9, 0], [13, 2], [17, 0]]][frame];
-    rect(g, 4, 21 + bob, 16, 2, '.');
-    legs.forEach(([x, d]) => { rect(g, x, 19 + bob, 2, 3 + d, 'K'); rect(g, x, 19 + bob, 2, 2 + d, 'O'); });
-  }
+  const g = fromRows(CAT_SIDE, 24, 24);
+  rect(g, 20, 5, 3, 11, 'K'); rect(g, 20, 6, 2, 10, 'O'); rect(g, 19, 3, 3, 4, 'K'); rect(g, 19, 4, 2, 3, 'O');
+  if (pose !== 'walk') return g;
+  const bob = [0, 1, 0, 1][frame];
+  if (bob) { const n = shiftBand(g, 0, 15, 1); for (let i = 0; i < g.d.length; i++) g.d[i] = n.d[i]; }
+  const sets = [
+    [[4, 5, 0], [8, 3, 2], [14, 5, 0], [18, 3, 2]],
+    [[5, 3, 2], [9, 5, 0], [15, 3, 2], [19, 5, 0]],
+    [[4, 4, 1], [8, 4, 1], [14, 4, 1], [18, 4, 1]],
+    [[3, 3, 2], [7, 5, 0], [13, 3, 2], [17, 5, 0]]
+  ][frame];
+  sets.forEach(([x, h, d]) => {
+    rect(g, x, 15 + bob, 3, h, 'K'); rect(g, x, 15 + bob, 2, h - 1, 'O');
+    rect(g, x - d, 15 + bob + h - 1, 3 + d, 2, 'K'); rect(g, x - d, 15 + bob + h - 1, 2 + d, 1, 'O');
+  });
   return g;
 }
 function kinuVomitFrame(n) {
@@ -1137,5 +1422,59 @@ function guesthouseNight() {   // 3.6 base: dark room, 04:00, nothing on the flo
   rect(g, 10, 62, 76, 30, 'D'); rect(g, 12, 64, 72, 12, 'S');
   rect(g, 12, 76, 72, 14, 'D'); rect(g, 8, 60, 4, 34, 'K'); rect(g, 86, 60, 4, 34, 'K');
   rect(g, 150, 4, 26, 12, 'K'); text(g, 153, 7, '0400', 'S');
+  return g;
+}
+
+function fgScruffed(g, x, y) {
+  rect(g, x + 22, y - 4, 62, 13, 'K'); rect(g, x + 22, y - 3, 61, 11, 'N'); rect(g, x + 22, y - 3, 61, 2, 'C');
+  rect(g, x + 62, y - 6, 8, 17, 'K'); rect(g, x + 63, y - 5, 7, 15, 'W');
+  rect(g, x + 14, y - 5, 12, 14, 'K'); rect(g, x + 15, y - 4, 10, 12, 'N');
+  for (let i = 0; i < 3; i++) rect(g, x + 16, y - 2 + i * 4, 8, 1, 'B');
+  rect(g, x + 8, y - 2, 8, 9, 'K'); rect(g, x + 9, y - 1, 6, 7, 'O');
+  rect(g, x + 2, y - 8, 3, 7, 'K'); rect(g, x + 3, y - 7, 2, 6, 'O');
+  rect(g, x + 12, y - 9, 3, 7, 'K'); rect(g, x + 12, y - 8, 2, 6, 'O');
+  ell(g, x + 8, y + 3, 8, 7, 'K'); ell(g, x + 8, y + 3, 7, 6, 'O'); ell(g, x + 8, y + 5, 5, 4, 'L');
+  rect(g, x + 4, y + 2, 3, 2, 'A'); px(g, x + 5, y + 2, 'K');
+  rect(g, x + 10, y + 2, 3, 2, 'A'); px(g, x + 11, y + 2, 'K');
+  rect(g, x + 7, y + 6, 3, 1, 'N'); px(g, x + 8, y + 7, 'B');
+  for (let i = 0; i < 3; i++) { rect(g, x - 1, y + 4 + i * 2, 6, 1, 'W'); rect(g, x + 12, y + 4 + i * 2, 6, 1, 'W'); }
+  rect(g, x + 3, y + 9, 12, 20, 'K'); rect(g, x + 4, y + 10, 10, 19, 'O'); rect(g, x + 5, y + 14, 8, 12, 'L');
+  rect(g, x + 4, y + 29, 4, 7, 'K'); rect(g, x + 5, y + 29, 2, 6, 'O');
+  rect(g, x + 11, y + 29, 4, 6, 'K'); rect(g, x + 12, y + 29, 2, 5, 'O');
+  rect(g, x + 3, y + 35, 6, 2, 'K'); rect(g, x + 10, y + 34, 6, 2, 'K');
+  rect(g, x + 15, y + 16, 3, 12, 'K'); rect(g, x + 15, y + 17, 2, 11, 'O');
+  rect(g, x + 17, y + 26, 4, 3, 'K'); rect(g, x + 17, y + 27, 3, 2, 'O'); rect(g, x + 20, y + 28, 3, 5, 'K');
+  return g;
+}
+
+function boots(fouled) {
+  const g = G(180, 110);
+  rect(g, 0, 0, 180, 60, 'S'); rect(g, 0, 0, 180, 2, 'K');
+  rect(g, 0, 54, 180, 6, 'K'); rect(g, 0, 55, 180, 4, 'T');
+  rect(g, 0, 60, 180, 50, 'B');
+  for (let i = 0; i < 6; i++) { rect(g, 0, 62 + i * 8, 180, 1, 'K'); for (let x = (i * 13) % 30; x < 180; x += 34) rect(g, x, 63 + i * 8, 1, 7, 'K'); }
+  rect(g, 0, 4, 30, 56, 'K'); rect(g, 2, 6, 26, 52, 'D');
+  rect(g, 22, 24, 4, 4, 'P'); rect(g, 30, 4, 3, 56, 'K');
+  rect(g, 33, 4, 6, 56, 'W'); rect(g, 39, 4, 2, 56, 'C');
+  rect(g, 60, 10, 70, 4, 'K'); rect(g, 61, 11, 68, 2, 'N');
+  [70, 92, 114].forEach(x => { rect(g, x, 14, 3, 5, 'K'); rect(g, x - 1, 18, 5, 2, 'K'); });
+  rect(g, 86, 18, 18, 30, 'K'); rect(g, 87, 19, 16, 28, 'G'); rect(g, 87, 19, 16, 2, 'W');
+  rect(g, 108, 18, 16, 26, 'K'); rect(g, 109, 19, 14, 24, 'D');
+  const boot = (x, shell, sole) => {
+    rect(g, x, 66, 15, 26, 'K'); rect(g, x + 1, 67, 13, 24, shell);
+    rect(g, x + 1, 67, 13, 3, 'K'); rect(g, x + 2, 70, 11, 4, 'K');
+    for (let i = 0; i < 4; i++) { rect(g, x + 3, 76 + i * 4, 9, 1, 'K'); px(g, x + 2, 76 + i * 4, sole); }
+    rect(g, x - 1, 92, 17, 5, 'K'); rect(g, x, 93, 15, 3, sole); rect(g, x - 1, 97, 17, 2, 'K');
+    rect(g, x + 1, 99, 15, 3, 'K');
+  };
+  boot(46, 'B', 'K'); boot(64, 'B', 'K');
+  boot(94, 'D', 'S'); boot(112, 'D', 'S');
+  boot(142, 'T', 'K'); boot(160, 'T', 'K');
+  if (fouled) {
+    rect(g, 96, 70, 11, 5, 'V'); rect(g, 96, 70, 11, 1, 'K'); px(g, 100, 71, 'R');
+    rect(g, 98, 75, 6, 3, 'V'); rect(g, 100, 78, 3, 8, 'V'); px(g, 101, 84, 'R');
+    rect(g, 93, 92, 8, 2, 'V'); ell(g, 92, 97, 6, 3, 'V'); px(g, 91, 97, 'R');
+    rect(g, 86, 99, 14, 2, 'K');
+  }
   return g;
 }

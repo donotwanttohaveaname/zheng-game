@@ -74,7 +74,9 @@ function buildGfx() {
   GFX.icons.muteOn = gridToCanvas(mute(true));
   GFX.icons.muteOff = gridToCanvas(mute(false));
 
-  ['tower', 'cups', 'hierophant', 'pentacles', 'devil', 'wheel', 'fool', 'back'].forEach(k => GFX.tarot[k] = gridToCanvas(tarot(k)));
+  ['tower', 'cups', 'hierophant', 'pentacles', 'devil', 'wheel', 'fool', 'back',
+   'moon', 'star', 'hermit', 'lovers', 'swords', 'temperance', 'sun', 'hanged', 'death',
+   'magician', 'priestess', 'empress', 'justice', 'strength', 'chariot', 'world', 'ace'].forEach(k => GFX.tarot[k] = gridToCanvas(tarot(k)));
 }
 
 /* ---------- environment cards ---------- */
@@ -133,6 +135,9 @@ function envCard(name) {
     case 'laptop_puke': g = standupLaptop(true); break;
     case 'calendar': g = calendar(); break;
     case 'stairwell': g = stairwell(); break;
+    case 'boots': g = boots(false); break;
+    case 'boots_ruined': g = boots(true); break;
+    case 'window_caught': { g = windowCard(false, true); fgScruffed(g, 92, 26); break; }
     case 'phone': g = phoneCase('tape'); break;
     case 'listings': g = toriListings(); break;
     case 'dark': g = bathroom(); break;

@@ -45,7 +45,8 @@ MINIGAMES.CLEAN_UP = {
     this.phase = 'towel';      // towel → wipe → route
     this.towel = { x: 8, y: 178, w: 34, h: 34, label: '' };
     this.leaveBtn = { x: 122, y: 292, w: 54, h: 24, label: 'LEAVE IT' };
-    this.pickT = 0; this.left = false; this.wiped = 0;
+    this.pickT = 0; this.left = false; this.wiped = 0; this.wrongBin = false;
+    this.binToast = null; this.binToastT = 0; this.doneAfterToast = false;
     this.bins = ['BIO', 'MIXED', 'PAPER', '?'].map((label, i) => ({
       label, x: 6 + i * 43, y: 246, w: 41, h: 32,
       color: ['G', 'S', 'P', 'M'][i],
@@ -80,7 +81,7 @@ MINIGAMES.CLEAN_UP = {
         }
       });
     }
-    if (this.t >= this.dur && !this.done) { this.left = true; this.done = true; }
+    if (this.t >= this.dur && !this.done && !this.doneAfterToast) { this.left = true; this.done = true; }
     if (this.done && this.binToastT > 0) this.done = false, this.doneAfterToast = true;
     if (this.doneAfterToast && this.binToastT <= 0) this.done = true;
   },
@@ -137,7 +138,6 @@ MINIGAMES.SORTING_HELL = {
       ['PAPER', 'P'], ['CARD', 'B'], ['GLASS', 'Z'], ['METAL', 'T'],
       ['PLASTIC', 'A'], ['BIO', 'G'], ['MIXED', 'S'], ['?', 'M'],
     ];
-    this.binOff = 0;   // which four bins are visible
     this.waves = [
       [['banana peel', 'BIO'], ['newspaper', 'PAPER'], ['wine bottle', 'GLASS']],
       [['a thermal receipt', '?'], ['a tea bag', '?'], ['a "compostable" fork', '?']],
@@ -145,9 +145,8 @@ MINIGAMES.SORTING_HELL = {
     ];
     this.wave = 0; this.idx = 0; this.itemY = MG_TOP + 20;
     this.wrong = 0; this.toast = null; this.toastT = 0; this.hintT = 0; this.hinted = {};
-    this.larr = { x: 2, y: 236, w: 26, h: 42, label: '<' };
-    this.rarr = { x: 152, y: 236, w: 26, h: 42, label: '>' };
   },
+  binRect(i) { return { x: 2 + (i % 4) * 44, y: 240 + Math.floor(i / 4) * 34, w: 43, h: 30 }; },
   item() { const w = this.waves[this.wave]; return w && w[this.idx]; },
   advance() {
     this.idx++;
@@ -175,19 +174,17 @@ MINIGAMES.SORTING_HELL = {
     let handled = false;
     input.taps.forEach(tp => {
       if (handled || this.done) return;
-      if (inRect(tp, this.larr)) { this.binOff = Math.max(0, this.binOff - 1); AUDIO.sfx('S_CHOICE_HOVER'); handled = true; return; }
-      if (inRect(tp, this.rarr)) { this.binOff = Math.min(4, this.binOff + 1); AUDIO.sfx('S_CHOICE_HOVER'); handled = true; return; }
       // tap the falling item: pause it, show the hint card. once per item.
       const hkey = this.wave * 10 + this.idx;
       if (Math.abs(tp.x - 90) < 44 && Math.abs(tp.y - this.itemY) < 14 && this.hintT <= 0 && !this.hinted[hkey]) {
         this.hinted[hkey] = true;
         this.hintT = 2; handled = true; AUDIO.sfx('S_CHOICE_HOVER'); return;
       }
-      for (let i = 0; i < 4; i++) {
-        const b = { x: 30 + i * 30, y: 246, w: 29, h: 32 };
+      for (let i = 0; i < 8; i++) {
+        const b = this.binRect(i);
         if (!inRect(tp, b)) continue;
         handled = true;
-        const [label] = this.allBins[this.binOff + i];
+        const [label] = this.allBins[i];
         if (label === it[1]) AUDIO.sfx('S_BIN_RIGHT');
         else {
           this.wrong++; AUDIO.sfx('S_BIN_WRONG');
@@ -196,7 +193,7 @@ MINIGAMES.SORTING_HELL = {
         this.advance();
       }
     });
-    if (this.itemY > 240) {
+    if (this.itemY > 232) {
       this.wrong++; AUDIO.sfx('S_BIN_WRONG');
       this.toast = this.julius(this.wrong); this.toastT = 1.5;
       this.advance();
@@ -208,16 +205,13 @@ MINIGAMES.SORTING_HELL = {
   },
   draw(ctx) {
     mgFrame(ctx, 'SORTING HELL · WAVE ' + Math.min(3, this.wave + 1) + '/3', this.t, this.dur);
-    for (let i = 0; i < 4; i++) {
-      const [label, col] = this.allBins[this.binOff + i];
-      const x = 30 + i * 30;
-      ctx.fillStyle = PAL20[col]; ctx.fillRect(x, 246, 29, 32);
-      ctx.fillStyle = PAL20.K; ctx.fillRect(x, 246, 29, 5);
-      const shortLabel = label.length > 4 ? label.slice(0, 4) : label;
-      drawTextCenter(ctx, shortLabel, x + 14, 258, PAL20.K);
-      if (label === '?') drawTextCenter(ctx, '?', x + 14, 266, PAL20.W);
+    for (let i = 0; i < 8; i++) {
+      const [label, col] = this.allBins[i];
+      const b = this.binRect(i);
+      ctx.fillStyle = PAL20[col]; ctx.fillRect(b.x, b.y, b.w, b.h);
+      ctx.fillStyle = PAL20.K; ctx.fillRect(b.x, b.y, b.w, 4);
+      drawTextCenter(ctx, label, b.x + b.w / 2, b.y + 13, PAL20.K);
     }
-    mgBtn(ctx, this.larr, false); mgBtn(ctx, this.rarr, false);
     const it = this.item();
     if (it && !this.done) {
       drawTextCenter(ctx, it[0], 90, Math.round(this.itemY), PAL20.W);
@@ -229,7 +223,7 @@ MINIGAMES.SORTING_HELL = {
         drawTextCenter(ctx, 'what it is MADE of', 90, 148, PAL20.P);
       }
     }
-    drawText(ctx, 'wrong: ' + this.wrong, 6, 236, PAL20.T);
+    drawText(ctx, 'wrong: ' + this.wrong, 6, 228, PAL20.T);
     if (this.toastT > 0 && this.toast) {
       ctx.fillStyle = PAL20.K; ctx.fillRect(8, 150, 164, 24);
       ctx.strokeStyle = PAL20.G; ctx.strokeRect(8.5, 150.5, 163, 23);
@@ -332,7 +326,7 @@ MINIGAMES.THE_DINNER = {
     drawTextCenter(ctx, 'tap food as it drifts past.', 90, 262, PAL20.T);
     drawTextCenter(ctx, 'green: TASTE. red: TASTE and MEAT.', 90, 272, PAL20.T);
   },
-  result() { return { win: true, meat: this.meat, taste: this.taste }; },
+  result() { return { win: true, meat: this.meat, taste: this.taste, adds: this.adds }; },
 };
 
 /* ---- 4. THE FAN: one fan, three targets, no AC. there was never an AC. ---- */
@@ -503,11 +497,12 @@ MINIGAMES.CO_OP = {
 /* ---- 6. SLACK STORM: swiped-away pings come back. they always come back. ---- */
 MINIGAMES.SLACK_STORM = {
   init(cfg) {
+    this.hrGone = false;
     this.dur = 10; this.t = 0; this.done = false;
     // the noise is varied noise. the one that matters states its stakes.
     const NOISE = [
       ['Jira', '47 updates'], ['IT', 'the printer again'], ['all-hands', 'moved to 8:15'],
-      ['Marketing', 'cake, kitchen 3'], ['Tuomas', '?'], ['Mikko (OOO)', 'auto-reply'],
+      ['Marketing', 'cake, kitchen 3'], ['Tuomas', '?'], ['Maria (OOO)', 'auto-reply'],
     ];
     this.pings = [];
     let ni = 0;
@@ -529,7 +524,7 @@ MINIGAMES.SLACK_STORM = {
   update(dt, input) {
     this.t += dt;
     if (this.wall > 0) { this.wall -= dt; return; }
-    this.pings.forEach(p => { if (p.alive) p.x += p.vx * dt; });
+    this.pings.forEach(p => { if (p.alive) p.x += (p.x > 106 ? -75 : -15) * dt; });
     input.taps.forEach(tp => this.pings.forEach(p => {
       if (p.alive && inRect(tp, p)) {
         if (p.kind === 'HR') { this.hrTapped = true; p.alive = false; AUDIO.sfx('S_CHOICE_CONFIRM'); }
@@ -671,6 +666,7 @@ MINIGAMES.DRINK_DODGE = {
 /* ---- 9. DEFENESTRATION DEFENSE ---- */
 MINIGAMES.DEFENESTRATION = {
   init(cfg) {
+    this.launched = false;
     this.dur = 12; this.t = 0; this.done = false;
     this.events = [
       { at: 1.5, real: false }, { at: 3.6, real: false }, { at: 5.4, real: false },
@@ -748,9 +744,14 @@ const MG_AFTER = {
   THE_DINNER(res, s) {
     const out = [];
     out.push({ t: 'art', img: 'dinner' });
-    if (res.meat === 0) {
+    if (res.meat === 0 && (res.adds || 0) < 4) {
+      bump('love', 1); bump('sanity', -1);
+      out.push(N('The food is fine. There is not very much of it.'));
+      out.push(SAY('AINO', "It's lovely. It's a lovely amount.", 'warm'));
+      out.push(N('Everyone has seconds of the bread. There is a lot of bread, suddenly.'));
+    } else if (res.meat === 0) {
       bump('love', 3); bump('sanity', -2);   // +1 is Aino's, on top of the normal outcome
-      out.push(N('The guests are delighted. Rasmus asks for the recipe and means it. Julius glows.'));
+      out.push(N('The guests are delighted. Rasmus takes a photo of his plate. Of the food, this time. Julius glows.'));
       out.push(SAY('AINO', "This is so good. Is the cream oat? It's oat, isn't it. It's so good.", 'warm'));
       out.push(N('She has three helpings and asks for the recipe and means it.'));
       out.push(Z('...', 'polite'));
@@ -867,6 +868,7 @@ const MG_AFTER = {
   DRINK_DODGE(res, s) { return []; },
   DEFENESTRATION(res, s) {
     if (res.win) return [
+      { t: 'art', img: 'window_caught' },
       Z('No. No. No.', 'alarm'),
       N('Kinu, scruffed, dangling, entirely unbothered.'),
       N('She is not sorry. She has never been sorry. Sorry is not available to her.'),
