@@ -356,7 +356,7 @@ CHOICES.WINDOW = {
   ],
   options: [
     { label: 'Open it', hide: s => s.windowOpen,
-      apply: s => { s.temp -= 8; bump('sanity', 1); s.windowOpen = true; s.windowEverOpened = true; },
+      apply: s => { s.temp -= 8; bump('sanity', 1); s.windowOpen = true; s.windowEverOpened = true; s.windowOpens++; },
       after: [
         Z("She's asleep. She's been asleep for four hours."),
         SFXB('S_WINDOW_OPEN'),
@@ -369,7 +369,7 @@ CHOICES.WINDOW = {
         SFXB('S_WINDOW_SHUT'),
         N('He is from Nanchang. It is, in fact, one of the famous furnace cities of China. This information helps him in no way whatsoever.'),
       ] },
-    { label: 'Leave it open', hide: s => !s.windowOpen, apply: () => {},
+    { label: 'Leave it open', hide: s => !s.windowOpen, apply: s => { s.windowOpens++; },
       after: [
         N('Kinu, on the sill, watching the street with the stillness of a professional.'),
         Z('Not the birds. We talked about the birds.'),
@@ -638,6 +638,25 @@ DAYS[5] = [
   { t: 'art', img: 'apartment_hot', music: 'M_HOME_HOT' },
   { t: 'choice', id: 'TAROT' },
   { t: 'choice', id: 'WINDOW' },
+  { t: 'if', cond: s => s.windowOpens >= 3 && s.kinu >= 1, then: [
+    { t: 'pause', s: 1 },
+    { t: 'art', img: 'window' },
+    N('The sill is empty.'),
+    Z('...'),
+    Z('Kinu?'),
+    SFXB('S_VOMIT_WARN'),
+    N('The apartment is thirty-four square metres. He checks all of them twice.'),
+    N('The window stays open the whole time, like an accusation.'),
+    Z('Kinu. KINU.'),
+    SFXB('S_DOORBELL'),
+    { t: 'art', img: 'anna' },
+    SAY('ANNA', 'Yours, I believe.', 'neutral'),
+    N("Kinu, in Anna's arms, purring like an engine that started without him."),
+    SAY('ANNA', 'She knocked. Your cat knocks.'),
+    Z('She knocked.'),
+    N('He carries her back up three floors. She allows it, the way royalty allows things.'),
+    { t: 'do', fn: s => { bump('sanity', -1); s.f.kinuWandered = true; } },
+  ] },
   SFXB('S_COIN_BIG'),
   { t: 'money', delta: 900, label: 'SALARY: €900' },
   { t: 'face', who: 'ZHENG', face: 'happy' },
@@ -1094,6 +1113,9 @@ CHOICES.KINU7 = {
       after: [
         N('Anna says yes before he finishes the sentence. Anna has been waiting to be asked since March. Anna already has a bowl.'),
         N('The bowl has her name on it. Anna wrote the name.'),
+        { t: 'if', cond: s => s.f.kinuWandered, then: [
+          N('She has, after all, already stayed once. Briefly. Without permission.'),
+        ] },
       ] },
     { label: 'Both bowls full, and hope.', require: s => s.smell >= 5, apply: s => { s.kinu = 0; },
       after: [

@@ -15,7 +15,7 @@ function resetState() {
   S = {
     day: 1, money: 650, job: 5, love: 5, friends: 3, sanity: 10, kinu: 3,
     friendsBase: 3, friendsDecay: 0, contactToday: false,   // v3.8: friendship decays without contact
-    temp: 26, windowOpen: false, windowEverOpened: false,
+    temp: 26, windowOpen: false, windowEverOpened: false, windowOpens: 0,
     fanTaps: 0, fanMain: null, booked: false, bookedPrice: null,
     guilt: 0, overtime: 0, sold: [],
     smell: 0, stains: [], mattBond: 0, juliusTrust: null,
