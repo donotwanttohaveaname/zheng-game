@@ -343,9 +343,15 @@ CHOICES.WINDOW = {
   prompt: [
     { t: 'art', img: 'window' },
     { t: 'if', cond: s => !s.windowOpen, then: [
-      { t: 'say', who: 'NARRATOR', dyn: s => 'It is ' + Math.round(s.temp) + ' degrees and climbing. The window works perfectly. That is the problem.' },
+      { t: 'say', who: 'NARRATOR', dyn: s => s.day <= 1
+        ? 'It is ' + Math.round(s.temp) + ' degrees and climbing. The window works perfectly. That is the problem.'
+        : s.day <= 3
+          ? Math.round(s.temp) + ' degrees now. The window has not moved. It is waiting to be asked.'
+          : Math.round(s.temp) + ' degrees, and guests at seven. The window is the only air conditioning this apartment will ever know.' },
     ], else: [
-      N('The window is open. The apartment is bearable. Kinu has discovered the sill.'),
+      { t: 'say', who: 'NARRATOR', dyn: s => s.day <= 3
+        ? 'The window is open. The apartment is bearable. Kinu has discovered the sill.'
+        : 'The window is still open. The sill is Kinu\'s now. She has notarised it.' },
     ] },
   ],
   options: [
