@@ -42,6 +42,12 @@ const VOMIT_DAY = (day, size, lines) => [{ t: 'if', cond: s => s.kinu >= 1, then
   { t: 'game', id: 'CLEAN_UP' },
 ] }];
 
+const KINU_GONE_CHECK = () => ({ t: 'if', cond: s => s.kinu === 0 && !s.f.kinuLeft, then: [
+  { t: 'do', fn: s => { s.f.kinuLeft = true; } },
+  N("At some point in the evening, without ceremony, Kinu moves to Anna's."),
+  N('Nobody sees her decide. Nobody ever sees her decide.'),
+] });
+
 const DAYS = {};
 
 /* ================= DAY 0: THE PROMISE (prologue, run one only) ================= */
@@ -350,6 +356,8 @@ DAYS[4] = [
     SAY('VET', 'No tone.'),
     SFXB('S_BILL_STAMP'), SFXB('S_VOMIT', 1.3),
     N('In the carrier. On the way home.'),
+    { t: 'do', fn: s => bump('kinu', -1) },
+    KINU_GONE_CHECK(),
   ] },
   { t: 'art', img: 'office', music: 'M_OFFICE' },
   SFXB('S_SANDAL_STING'),
@@ -408,6 +416,11 @@ DAYS[5] = [
   SFXB('S_BILL_STAMP'),
   { t: 'money', delta: s => -(ELECTRICITY_BASE + 12 * s.fanTaps), label: 'ELECTRICITY' },
   N('The four seconds are over.'),
+  { t: 'if', cond: s => Math.floor(s.sanity) < 4, then: [
+    SFXB('S_SLACK_PING'),
+    N('A Slack message arrives. It is from Zheng. It is timestamped eleven minutes from now.'),
+    Z('...'),
+  ] },
   { t: 'if', cond: s => s.unread >= 12, then: [
     { t: 'do', fn: s => bump('job', -2) },
     SFXB('S_SLACK_STORM'),
@@ -812,15 +825,40 @@ CHOICES.JULIUS7 = {
       after: [
         N('It is a long evening. Neither of them says the thing. They watch most of a documentary about soil.'),
       ] },
-    { label: 'Tell him everything.', require: s => s.love >= 1, apply: s => { bump('sanity', 5); bump('love', s.f.confessed ? 3 : -3); },
+    { label: 'Tell him everything.', require: s => s.love >= 1,
+      apply: s => {
+        const sins = (s.f.temuSecret ? 1 : 0) + (s.f.lied ? 1 : 0) + (s.f.soldCrock ? 1 : 0);
+        if (sins === 0) { bump('sanity', 2); bump('love', 1); }
+        else { bump('sanity', 5); bump('love', s.f.confessed ? 3 : -3); }
+      },
       after: [
-        Z('I bought the phone case. And I lied about the soup. And I sold the crock.'),
-        SAY('JULIUS', 'I knew about the case.', 'curious'),
-        Z('How.'),
-        SAY('JULIUS', 'The cardboard was in the recycling, Zheng.'),
-        SAY('JULIUS', 'You sorted it correctly.'),
-        { t: 'pause', s: 2 },
-        N('He sorted it correctly. That is the part that hurts.'),
+        { t: 'if', cond: s => (s.f.temuSecret || s.f.lied || s.f.soldCrock), then: [
+          { t: 'say', who: 'ZHENG', dyn: s => {
+            const parts = [];
+            if (s.f.temuSecret) parts.push('I bought the phone case');
+            if (s.f.lied) parts.push('I lied about the soup');
+            if (s.f.soldCrock) parts.push('I sold the crock');
+            return parts.join('. And ') + '.';
+          } },
+          { t: 'if', cond: s => s.f.temuSecret, then: [
+            SAY('JULIUS', 'I knew about the case.', 'curious'),
+            Z('How.'),
+            SAY('JULIUS', 'The cardboard was in the recycling, Zheng.'),
+            SAY('JULIUS', 'You sorted it correctly.'),
+            { t: 'pause', s: 2 },
+            N('He sorted it correctly. That is the part that hurts.'),
+          ], else: [
+            SAY('JULIUS', 'I know. I always know.', 'curious'),
+            SAY('JULIUS', "It's fine. It's not fine, but it's fine."),
+            N('Both halves of that sentence are true. That is the trick of him.'),
+          ] },
+        ], else: [
+          Z('I need to tell you everything.'),
+          SAY('JULIUS', '...', 'curious'),
+          Z('...'),
+          SAY('JULIUS', "I know. There's nothing. That's sort of the problem?"),
+          N('A confession with nothing in it. Somehow that is worse, and both of them know it.'),
+        ] },
       ] },
     { label: 'The evening passes.', require: s => s.love < 1, apply: () => {},
       after: [N('The documentary about soil plays to an empty sofa.')] },

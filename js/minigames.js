@@ -726,6 +726,9 @@ const MG_AFTER = {
       out.push(SAY('JULIUS', "Does it smell in here? It doesn't. Does it?", 'curious'));
       out.push({ t: 'do', fn: () => bump('love', -1) });
     }
+    // she notices what he leaves. no line about it.
+    if (s.smell === 2 || s.smell === 4) out.push({ t: 'do', fn: () => bump('kinu', -1) });
+    out.push(KINU_GONE_CHECK());
     return out;
   },
   SORTING_HELL(res, s) {
@@ -797,6 +800,17 @@ const MG_AFTER = {
     s.fanTaps = res.fanMinutes;             // €12 per 5 seconds of runtime, billed Friday
     s.fanKinu = res.kinuCalmed;
     s.fanRanDay = s.day; s.fanMain = res.mainTarget;   // feeds the 3.2 temperature model
+    if (res.risk > 3) {
+      bump('kinu', -1);
+      bump('job', res.win ? 1 : -1);
+      return [
+        N('Kinu watched the fan point at everything except her. She has filed it away.'),
+        KINU_GONE_CHECK(),
+        ...(res.win
+          ? [Z("Done. It's done. It's not good but it's done.")]
+          : [N('He sends it at 02:10 with the wrong file attached. The right file is called "final_v2_ACTUAL".')]),
+      ];
+    }
     if (res.win) { bump('job', 1); return [Z("Done. It's done. It's not good but it's done.")]; }
     bump('job', -1);
     return [
