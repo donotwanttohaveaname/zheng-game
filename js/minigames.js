@@ -69,7 +69,7 @@ MINIGAMES.CLEAN_UP = {
         if (p.routed) return;   // already binned: extra taps must not restart the ceremony
         this.bins.forEach(b => {
           if (!inRect(tp, b)) return;
-          if (b.label === 'MIXED') { AUDIO.sfx('S_BIN_RIGHT'); this.binToast = 'MIXED. correct.'; }
+          if (b.label === 'BIO') { AUDIO.sfx('S_BIN_RIGHT'); this.binToast = 'BIO. correct. it was food once.'; }
           else { AUDIO.sfx('S_BIN_WRONG'); this.wrongBin = true; this.binToast = this.day === 5 ? 'JULIUS, from the head of the table: hm?' : 'JULIUS, from the other room: hm?'; }
           this.binToastT = 1.1; this.pickT = 1.1;   // let the reaction land before the next puddle
           p.routed = true;

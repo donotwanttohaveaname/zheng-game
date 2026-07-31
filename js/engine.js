@@ -141,7 +141,7 @@ const WHO = {
   JOY: { color: PAL20.A, face: 'delighted', pref: 'JOY.' },
   ANNA: { color: PAL20.P, face: 'neutral', pref: 'ANNA.' },
   MATT: { color: PAL20.X, face: 'delighted', pref: 'MATT.' },
-  VET: { color: PAL20.N, face: 'neutral', pref: 'VET.' },
+  VET: { color: PAL20.N, face: 'neutral', pref: 'ALEKSI, VET.' },
   AAPO: { color: PAL20.G, face: 'talk', pref: 'AAPO.' },
   SUN: { color: PAL20.G, face: 'assess', pref: 'SUN.' },
   RASMUS: { color: PAL20.G, face: 'waiting', pref: 'RASMUS.' },
@@ -875,6 +875,11 @@ function dailySystemBeats(d) {
   if (d >= 3 && d < 7) out.push({ t: 'say', who: 'NARRATOR', text: '"' + MEETING_NAMES[d] + '"' });
   // below €80, the lenders appear
   out.push({ t: 'if', cond: s => s.money < 80, then: [{ t: 'choice', id: 'BORROW' }] });
+  // Saturday: if the fund is visibly short, the people who would help notice (3.9)
+  if (d === 6) out.push({ t: 'if', cond: s => !s.booked && s.money < flightPrice(7) && flightPrice(7) - s.money <= 400 && Object.keys(s.borrowed).length === 0, then: [
+    { t: 'say', who: 'NARRATOR', dyn: s => 'He is €' + Math.max(0, flightPrice(7) - s.money) + ' short, and the number is known to more people than he told.' },
+    { t: 'choice', id: 'BORROW' },
+  ] });
   // Joy's saga, Wednesday and Thursday: texts arrive, and answering is a choice (3.15 + playtest)
   if (d === 3) out.push({ t: 'if', cond: s => s.friends >= 1, then: [{ t: 'choice', id: 'JOY_WED' }] });
   if (d === 4) out.push({ t: 'if', cond: s => s.friends >= 1, then: [{ t: 'choice', id: 'JOY_THU' }] });
