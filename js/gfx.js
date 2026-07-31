@@ -108,7 +108,7 @@ function envCard(name) {
     return GFX.envCache[key];
   }
   if (name === 'tab') {   // the browser tab shows the live price. cached per day.
-    const price = typeof S !== 'undefined' ? (920 + 38 * (Math.min(7, S.day) - 1)) : 920;
+    const price = typeof S !== 'undefined' ? (S.tabPriceOverride || (S.inPrologue ? 882 : 920 + 38 * (Math.min(7, S.day) - 1))) : 920;
     const key = 'tab.' + price;
     if (!GFX.envCache[key]) GFX.envCache[key] = gridToCanvas(browserTab(String(price)));
     return GFX.envCache[key];

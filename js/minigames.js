@@ -44,15 +44,15 @@ MINIGAMES.CLEAN_UP = {
     this.pi = 0;               // current puddle
     this.phase = 'towel';      // towel → wipe → route
     this.towel = { x: 8, y: 178, w: 34, h: 34, label: '' };
-    this.leaveBtn = { x: 122, y: 292, w: 54, h: 24, label: 'LEAVE IT' };
+    this.leaveBtn = { x: 122, y: 210, w: 54, h: 22, label: 'LEAVE IT' };
     this.pickT = 0; this.left = false; this.wiped = 0; this.wrongBin = false;
     this.binToast = null; this.binToastT = 0; this.doneAfterToast = false;
-    // the bins change places every day. read them. muscle memory is not a virtue here.
-    const binDefs = [['BIO', 'G'], ['MIXED', 'S'], ['PAPER', 'P'], ['?', 'M']];
-    const rot = cfg.day % 4;
+    // six bins now, changing places every day. read them. muscle memory is not a virtue here.
+    const binDefs = [['BIO', 'G'], ['MIXED', 'S'], ['PAPER', 'P'], ['PLASTIC', 'A'], ['GLASS', 'Z'], ['?', 'M']];
+    const rot = (cfg.day * 5) % 6;
     const shuffled = binDefs.slice(rot).concat(binDefs.slice(0, rot));
     this.bins = shuffled.map(([label, color], i) => ({
-      label, color, x: 6 + i * 43, y: 246, w: 41, h: 32,
+      label, color, x: 2 + (i % 3) * 59, y: 242 + Math.floor(i / 3) * 30, w: 58, h: 27,
     }));
   },
   cur() { return this.puddles[this.pi]; },
@@ -70,7 +70,7 @@ MINIGAMES.CLEAN_UP = {
         this.bins.forEach(b => {
           if (!inRect(tp, b)) return;
           if (b.label === 'MIXED') { AUDIO.sfx('S_BIN_RIGHT'); this.binToast = 'MIXED. correct.'; }
-          else { AUDIO.sfx('S_BIN_WRONG'); this.wrongBin = true; this.binToast = 'JULIUS, from the other room: hm?'; }
+          else { AUDIO.sfx('S_BIN_WRONG'); this.wrongBin = true; this.binToast = this.day === 5 ? 'JULIUS, from the head of the table: hm?' : 'JULIUS, from the other room: hm?'; }
           this.binToastT = 1.1; this.pickT = 1.1;   // let the reaction land before the next puddle
           p.routed = true;
           if (this.pi < this.puddles.length - 1) { this.pi++; this.phase = 'towel'; }
@@ -158,7 +158,7 @@ MINIGAMES.SORTING_HELL = {
       'yoghurt lid': 'rinsed(ish) plastic is plastic.',
       'envelope, plastic window': 'the window is allowed. Finland forgives the window.',
       'one Kinu hairball': 'Kinu made it. it is organic.',
-      'a battery': 'never a bin. the special place by the door.',
+      'a battery': 'not a real bin. the mystery one. the collection point.',
     };
     this.wave = 0; this.idx = 0; this.itemY = MG_TOP + 20;
     this.wrong = 0; this.toast = null; this.toastT = 0; this.hintT = 0; this.hinted = {};
@@ -178,7 +178,7 @@ MINIGAMES.SORTING_HELL = {
       'JULIUS: Do you want me to just... do it?',
       "JULIUS: It's fine. Honestly. It's completely fine.",
       '(He sorts the rest of the bag himself.)',
-      '(He takes the bag out at 23:00.)'][Math.min(6, n)];
+      '(He looks at the clock. It is not yet 23:00.)'][Math.min(6, n)];
   },
   update(dt, input) {
     this.t += dt;
@@ -743,8 +743,8 @@ MINIGAMES.DEFENESTRATION = {
     if (cur && !cur.real) { img = GFX.kinu.crouch; dx = Math.sin(this.t * 40) * 1.5; }
     if (cur && cur.real) { img = GFX.kinu.launch; dx = (this.t - cur.at) * 60; }
     ctx.drawImage(img, Math.round(this.kinuPos.x + dx - 12), this.kinuPos.y, 48, 48);
-    drawTextCenter(ctx, 'tap her ONLY on the real jump', 90, 288, PAL20.T);
-    drawTextCenter(ctx, 'the crouch is the tell', 90, 298, PAL20.T);
+    drawTextCenter(ctx, 'she fakes three times. wait.', 90, 288, PAL20.T);
+    drawTextCenter(ctx, 'tap the LEAP, not the rehearsals.', 90, 298, PAL20.T);
   },
   result() { return { win: this.caught }; },
 };
@@ -984,7 +984,9 @@ const MG_AFTER = {
       N('Half the building watches from their windows. Anna watches from hers.'),
       { t: 'hold', s: 1.5 },
       N("When the truck leaves, Kinu walks to Anna's door, and sits, and does not look back."),
-      Z('He decides never to tell Joy about the name.'),
+      { t: 'say', who: 'NARRATOR', dyn: s => s.friends >= 3
+        ? 'He decides never to tell Joy about the name.'
+        : 'He memorises the name, for no reason he could explain to anybody.' },
     ];
   },
 };

@@ -86,18 +86,19 @@ function drawHUD(ctx) {
   drawTextCenter(ctx, dayName, 82, 1, PAL20.T);
   const drift = sanPips() < 4 && Math.random() < 0.02;
   const cur = drift ? '$' : '€';
+  const hudPrice = S.tabPriceOverride || (S.inPrologue ? 882 : flightPrice(S.day));
   if (S.booked) {
     drawTextRight(ctx, '✓ ' + cur + S.bookedPrice, 178, 1, PAL20.G);
   } else {
-    const can = S.money >= flightPrice(S.day);
+    const can = !S.inPrologue && !S.tabPriceOverride && S.money >= flightPrice(S.day);
     // the up-arrow animates when the price rises. it is the most important thing happening.
     const arrow = priceFlash > 0 ? (Math.floor(priceFlash * 5) % 2 ? '▲' : ' ') : '▲';
     if (can) {
       ctx.fillStyle = PAL20.A;
       ctx.fillRect(bookBtn.x, bookBtn.y, bookBtn.w, bookBtn.h);
-      drawTextRight(ctx, 'BOOK €' + flightPrice(S.day), 178, 1, PAL20.K);
+      drawTextRight(ctx, 'BOOK €' + hudPrice, 178, 1, PAL20.K);
     } else {
-      drawTextRight(ctx, cur + flightPrice(S.day) + ' ' + arrow, 178, 1, PAL20.A);
+      drawTextRight(ctx, cur + hudPrice + ' ' + arrow, 178, 1, PAL20.A);
     }
   }
   // row 2: the five icons (sanity is a float, displays as rounded-down pips)
@@ -270,7 +271,7 @@ class CardScene {
     ctx.fillStyle = PAL20.D; ctx.fillRect(0, 130, W, 60);
     ctx.fillStyle = PAL20.A; ctx.fillRect(0, 130, W, 2); ctx.fillRect(0, 188, W, 2);
     drawTextCenter(ctx, this.b.title, 90, 146, PAL20.W);
-    drawTextCenter(ctx, this.b.sub, 90, 165, PAL20.A);
+    drawTextCenter(ctx, typeof this.b.sub === 'function' ? this.b.sub(S) : this.b.sub, 90, 165, PAL20.A);
   }
 }
 
@@ -679,8 +680,12 @@ class EndingScene {
     SAVE.runs++; SAVE.bestMoney = Math.max(SAVE.bestMoney, S.money + (S.bookedPrice || 0));
     saveSave();
     if (this.e.usesShortfall) { SAVE.shortfalls = SAVE.shortfalls || {}; SAVE.shortfalls[key] = shortfall(); }
-    this.title = this.e.title.replace('{SHORTFALL}', shortfall());
-    this.text = this.e.text.map(t => t.replace('{SHORTFALL}', shortfall())).join('\n');
+    const sf = shortfall();
+    this.title = this.e.title.replace('{SHORTFALL}', sf);
+    this.text = this.e.text.map(t => sf === 0
+      ? t.replace('and €{SHORTFALL} short.', 'and the money was there. He just never pressed it.')
+         .replace('€{SHORTFALL} short', 'zero euros short, which is a different illness')
+      : t.replace('{SHORTFALL}', sf)).join('\n');
     this.card = endingCard(key);
     this.t = 0; this.chars = 0;
     this.breezeHold = this.e.breeze ? 8 : 0;

@@ -67,7 +67,7 @@ const VOMIT_DAY = (day, size, lines) => [{ t: 'if', cond: s => s.kinu >= 1, then
 ] }];
 
 const KINU_GONE_CHECK = () => ({ t: 'if', cond: s => s.kinu === 0 && !s.f.kinuLeft, then: [
-  { t: 'do', fn: s => { s.f.kinuLeft = true; } },
+  { t: 'do', fn: s => { s.f.kinuLeft = true; s.f.kinuLeftDay = s.day; } },
   N("At some point in the evening, without ceremony, Kinu moves to Anna's."),
   N('Nobody sees her decide. Nobody ever sees her decide.'),
 ] });
@@ -158,7 +158,7 @@ CHOICES.TAROT = {
           'She lays three cards face down. She does not look at them. She has never needed to look at them.',
           'Three cards, face down. The coffee is already poured. She knew he was coming.',
           'She shuffles once. The cards were already in the right order. The shuffle is for him.',
-          'Three cards go down on the low table, next to yesterday\'s card, which she has left out.',
+          'Three cards go down on the low table, next to the last card, which she has left out.',
           'She lays the cards without looking up from her crossword.',
           'The cards are dealt before he finishes knocking.',
           'Three cards, face down, dealt like a verdict.',
@@ -313,6 +313,8 @@ CHOICES.BORROW = {
 /* ================= DAY 1: MONDAY ================= */
 DAYS[1] = [
   { t: 'card', title: 'MONDAY', sub: '09:00 · 26°C · €650' },
+  { t: 'art', img: 'apartment_hot', music: 'M_HOME_HOT' },
+  N('The other person in this apartment is Julius. Boyfriend. Three years. Currently asleep, holding the duvet like a jar.'),
   { t: 'art', img: 'apartment_hot', music: 'M_HOME_HOT', temp: 26 },
   N('Six hundred and fifty euros, and a promise he made in a bar.'),
   { t: 'choice', id: 'TAROT' },
@@ -478,7 +480,7 @@ CHOICES.SUSANJOY = {
 
 /* ================= DAY 3: WEDNESDAY ================= */
 DAYS[3] = [
-  { t: 'card', title: 'WEDNESDAY', sub: '31°C · CAR LOAN DUE' },
+  { t: 'card', title: 'WEDNESDAY', sub: s => Math.round(s.temp) + '°C · CAR LOAN DUE' },
   { t: 'art', img: 'apartment_hot', music: 'M_JULIUS' },
   { t: 'choice', id: 'TAROT' },
   { t: 'choice', id: 'WINDOW' },
@@ -503,12 +505,12 @@ CHOICES.TEMU = {
   prompt: [
     { t: 'art', img: 'phone' },
     N("Zheng's phone case is two strips of tape and the memory of a phone case."),
-    N('The listing: "Cute Silicone Cat Bomb Case". Plus a screen protector. Plus shipping. All of it together, two euros nineteen.'),
-    Z("It's two euros nineteen."),
+    N('The listing: "Cute Silicone Cat Bomb Case". Plus a screen protector. Plus shipping. All of it together, two euros.'),
+    Z("It's two euros."),
     SAY('JULIUS', 'Do you know what that actually costs?', 'curious'),
     Z('Two euros nineteen.'),
     SAY('JULIUS', 'No.'),
-    Z('It says two euros nineteen.'),
+    Z('It says two euros.'),
     SAY('JULIUS', 'Zheng.'),
   ],
   options: [
@@ -517,7 +519,7 @@ CHOICES.TEMU = {
         SFXB('S_TEMU_BUY'),
         { t: 'art', img: 'dark' },
         Z('"Cute Silicone Cat Bomb Case."', 'joy'),
-        N('Ships in nineteen days. The flight is in four.'),
+        N('Ships in nineteen days. The flight is in five.'),
         Z("That's fine."),
       ] },
     { label: "Don't buy it.", apply: s => { bump('sanity', -2); s.f.caseCracks = true; },
@@ -536,7 +538,7 @@ CHOICES.TEMU = {
 
 /* ================= DAY 4: THURSDAY ================= */
 DAYS[4] = [
-  { t: 'card', title: 'THURSDAY', sub: '34°C AT HOME' },
+  { t: 'card', title: 'THURSDAY', sub: s => Math.round(s.temp) + '°C AT HOME' },
   { t: 'art', img: 'apartment_hot', music: 'M_HOME_HOT' },
   { t: 'choice', id: 'TAROT' },
   ...VOMIT_DAY(4, 3, [N('Kinu has vomited on the wifi router. There are sparks. The internet is gone for forty minutes and nobody at work believes him.')]),
@@ -620,7 +622,9 @@ CHOICES.OVERTIME = {
         { t: 'if', cond: s => s.overtime === 0, then: [
           SAY('SANDAL', 'no worries at all!!'),
           N('Two exclamation marks. Sandal is going to remember them in March.'),
-          N('At home, the crock is bubbling and somebody is glad to see him. The trade is not close.'),
+          { t: 'say', who: 'NARRATOR', dyn: s => s.f.breakAnnounced
+            ? 'At home, somebody has stopped packing for the evening, and is glad to see him. The trade is not close.'
+            : 'At home, the crock is bubbling and somebody is glad to see him. The trade is not close.' },
         ] },
         { t: 'if', cond: s => s.overtime === 1, then: [
           SAY('SANDAL', 'Totally! Rest is part of the work, honestly.'),
@@ -685,6 +689,7 @@ DAYS[5] = [
   { t: 'do', fn: s => { s.f.sausage = true; } },
   N('At 11:42, in a stairwell, standing up, alone, Zheng ate a sausage.'),
   { t: 'face', who: 'ZHENG', face: 'joy' },
+  { t: 'money', delta: -3, label: 'THE SAUSAGE: €2.90' },
   N('It cost two euros ninety. He has thought about it four times since.'),
   { t: 'art', img: 'kitchen', music: 'M_JULIUS' },
   { t: 'if', cond: s => s.juliusTrust !== 'LOW', then: [
@@ -742,8 +747,13 @@ DAYS[5] = [
     Z('...'),
   ]),
   N('The dinner continues for one hour and fifty minutes.'),
-  SAY('AINO', "Thank you for cooking. That's a lot of work for five people.", 'warm'),
-  N('She means it, which is the confusing part.'),
+  { t: 'if', cond: s => s.juliusTrust !== 'LOW', then: [
+    SAY('AINO', "Thank you for cooking. That's a lot of work for five people.", 'warm'),
+    N('She means it, which is the confusing part.'),
+  ], else: [
+    SAY('AINO', "Thank you both for tonight. That's a lot of work for five people.", 'warm'),
+    N('She says it to Julius. Zheng agrees, from the doorway.'),
+  ] },
   { t: 'if', cond: s => s.f.breakAnnounced && s.love >= 2, then: [
     N('Julius does the dishes. All of them. Slowly. The pans as well.'),
     { t: 'say', who: 'NARRATOR', dyn: s => s.f.soldCrock
@@ -820,7 +830,7 @@ DAYS[6] = [
       { t: 'hold', s: 2 },   // two full seconds of total silence. never skippable.
       { t: 'music', id: null },
       { t: 'art', img: 'apartment_hot' },
-      { t: 'if', cond: s => !s.f.juliusGone, then: [
+      { t: 'if', cond: s => true, then: [
         N("Zheng's apartment. Susan and Joy in the doorway. Julius holding a bin lid."),
         SAY('JULIUS', 'Hi! Come in, take your shoes off, we do shoes off.', 'warm'),
         SAY('JOY', 'why is there a bucket of cabbage'),
@@ -832,7 +842,10 @@ DAYS[6] = [
         SAY('JULIUS', 'It was making a noise!'),
         SAY('SUSAN', 'a NOISE'),
         SAY('JOY', "i think this is the nicest apartment i've ever been in"),
-        N('It is thirty three degrees. There is a bucket of cabbage. Eight bins and a plant. Grey toilet paper.'),
+        { t: 'if', cond: s => s.f.breakAnnounced, then: [
+          N('The packed bag is by the door. Neither Susan nor Joy asks about it. Both of them see it.'),
+        ] },
+        { t: 'say', who: 'NARRATOR', dyn: s => 'It is ' + Math.round(s.temp) + ' degrees. There is a bucket of cabbage. Eight bins and a plant. Grey toilet paper.' },
         N("For eleven minutes, Zheng's two worlds are in the same room. He says nothing at all. He has never been happier, or more frightened."),
         { t: 'do', fn: s => { bump('sanity', 3); bump('love', 1); bump('friends', 1); } },
       ] },
@@ -868,13 +881,19 @@ DAYS[6] = [
     ], else: [
       { t: 'if', cond: s => s.windowEverOpened, then: [
         { t: 'art', img: 'window' },
+        { t: 'if', cond: s => !s.windowOpen, then: [
+          N('The window is shut. This does not concern her. She has been studying the handle all week.'),
+          SFXB('S_WINDOW_OPEN'),
+        ] },
         SFXB('S_VOMIT_WARN'),
-        N('Kinu is crouched on the windowsill with her tail going. This is the real one, and she has been practising all week.'),
+        { t: 'say', who: 'NARRATOR', dyn: s => s.f.kinuWandered
+          ? 'Kinu is crouched on the windowsill with her tail going. Yesterday was the rehearsal. This is the real one.'
+          : 'Kinu is crouched on the windowsill with her tail going. This is the real one, and she has been practising all week.' },
         { t: 'game', id: 'DEFENESTRATION' },
       ], else: [
         { t: 'art', img: 'apartment_hot' },
         { t: 'do', fn: s => { bump('sanity', -2); } },
-        N('Thirty six degrees. He is typing in a towel. There is no minigame here. This is the minigame.'),
+        { t: 'say', who: 'NARRATOR', dyn: s => Math.round(s.temp) + ' degrees. He is typing in a towel. There is no minigame here. This is the minigame.' },
       ] },
     ] },
   ] },
@@ -989,7 +1008,9 @@ DAYS[7] = [
   ] },
   { t: 'choice', id: 'JULIUS7' },
   { t: 'if', cond: s => s.kinu >= 1, then: [{ t: 'choice', id: 'KINU7' }], else: [
-    N('Three floors down, Kinu is asleep on a coat Anna stopped wearing on Thursday so Kinu could sleep on it.'),
+    { t: 'say', who: 'NARRATOR', dyn: s => (s.f.kinuLeftDay || 4) >= 6
+      ? 'Three floors down, Kinu is asleep on a coat Anna took off the moment the fire truck left.'
+      : 'Three floors down, Kinu is asleep on a coat Anna stopped wearing on Thursday so Kinu could sleep on it.' },
     Z('...'),
     Z('She looks good.'),
   ] },
@@ -998,6 +1019,11 @@ DAYS[7] = [
     SAY('JOY', 'you said sunday.'),
     { t: 'pause', s: 1 },
     SAY('JOY', 'you actually said sunday.'),
+  ] },
+  { t: 'if', cond: s => s.booked && s.friends === 3, then: [
+    SFXB('S_SLACK_PING'),
+    SAY('JOY', 'ours says "pending". susan is ON IT.'),
+    N('Pending is a Susan word for a Joy problem. They will land on Wednesday.'),
   ] },
   { t: 'if', cond: s => s.booked && s.friends <= 2, then: [
     N('Susan books hers separately. She sends one message.'),
@@ -1105,7 +1131,7 @@ CHOICES.JULIUS7 = {
         ] },
       ] },
     { label: 'The evening passes.', require: s => s.love < 1, apply: () => {},
-      after: [N('The documentary about soil plays to an empty sofa.')] },
+      after: [N('The documentary about soil plays. Neither of them is watching it.')] },
   ],
 };
 CHOICES.KINU7 = {
@@ -1165,13 +1191,13 @@ const ENDINGS = {
     'He has money left over. He eats well. He walks eleven kilometres a day and sleeps like a stone.',
     'He looks extraordinary in the photographs.',
     'There are a great many photographs. He is not in any of them.'] },
-  '11000': { title: 'MAN, ALONE, ABROAD, UNWELL', tone: 'BLEAK', text: [
+  '11000': { title: 'MAN, ABROAD, UNWELL', tone: 'BLEAK', text: [
     'He orders plov for two and eats both plates.',
     'Afterwards he describes the meal, out loud, in detail, for eleven minutes.',
     'Nobody asked about the meal. He describes it anyway.'] },
   '10111': { title: 'UNEMPLOYED IN UZBEKISTAN', tone: 'GOOD', text: [
-    'Fired on Friday. Flying on Saturday. Eating garlic out of a metal tray by Sunday lunchtime.',
-    "Sandal's reply is four hundred and ten words long and arrives in twelve parts.",
+    'Jobless by Sunday. Airborne by Monday. Eating garlic out of a metal tray by lunchtime.',
+    "Sandal's farewell message is four hundred and ten words long and arrives in twelve parts.",
     'He deletes it eleven days later, from a train, without opening it.',
     'It is the single best week of his adult life.'] },
   '10110': { title: 'FREEDOM (DERANGED)', tone: 'WEIRD', text: [
@@ -1223,7 +1249,7 @@ const ENDINGS = {
     'The apartment is 31°C. The window is shut. The tab is open.',
     'The price has gone up again.'] },
   '01011': { title: 'THE CAT TAX', tone: 'WEIRD', text: [
-    'The fund is short. The cat is gone. The two facts are not even related. He has checked.',
+    'The trip did not happen. The cat is gone. The two facts are not even related. He has checked.',
     'The universe invoiced him in full and delivered nothing.',
     'He keeps the receipts. He does not know why.'] },
   '01010': { title: 'THE INVOICE FOLDER', tone: 'BLEAK', text: [
@@ -1245,7 +1271,7 @@ const ENDINGS = {
     "It's annoying how fine he is."] },
   '00110': { title: 'OFF-GRID (INVOLUNTARY)', tone: 'WEIRD', text: [
     'No job, no money, no sense.',
-    'But a cat, a boyfriend, and eleven litres of fermented cabbage in a crock in the hallway.',
+    'But a cat, a boyfriend, and a hallway that smells of fermented cabbage, and always will.',
     'They are going to be okay in a way that frightens their families.'] },
   '00101': { title: 'JUST HIM AND THE CAT', tone: 'CALM', text: [
     'Lost the job, the money, the man.',
@@ -1268,7 +1294,7 @@ const ENDINGS = {
     'This is the ending the game respects most and it plays no music at all.'] },
   '00000': { title: 'THE OPEN WINDOW', tone: 'CALM', breeze: true, text: [
     'No money. No job. No cat. No Julius. No mind.',
-    'The window is finally open. There is a breeze.',
+    'The window is open. There is a breeze.',
     'The corner readout reads 21°C, OPTIMAL.',
     'For the first time in seven days, Zheng is comfortable.',
     "It's the first good thing all week."] },
@@ -1363,7 +1389,7 @@ function arrivalBeats(s) {
     b.push(Z('...'));
     b.push(Z('Okay.'));
   } else {
-    b.push(N('He eats alone at a plastic table in a city he has thought about for two years.'));
+    b.push(N('He eats alone at a plastic table in a city he has thought about every day since March.'));
     b.push(N('It is not sad. People keep expecting it to be sad.'));
   }
   if (K) {
@@ -1381,6 +1407,7 @@ function arrivalBeats(s) {
 function codaBeats(s) {
   const K = s.kinu >= 1, SA = s.sanity >= 1;
   const b = [];
+  b.push({ t: 'do', fn: s => { s.tabPriceOverride = 1186; } });
   b.push({ t: 'art', img: 'tab', music: null });
   b.push(N('It is Monday.'));
   b.push(SFXB('S_PRICE_UP'));
@@ -1394,6 +1421,7 @@ function codaBeats(s) {
     b.push(N('He says the number eleven times over the next four days.'));
   }
   if (K) {
+    b.push(N('Anna brought her back up on Monday morning. Neither of them mentions the week that did not happen.'));
     b.push(N('Kinu walks across the keyboard and closes the tab.'));
     b.push(N('She closes the tab. She did not mean to. She has never meant to do anything in her life.'));
     b.push(Z('...'));
