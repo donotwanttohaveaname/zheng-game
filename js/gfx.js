@@ -194,8 +194,8 @@ const ENDING_ART = {
   '10100': () => { const g = uzbek(); rect(g, 96, 88, 20, 12, 'K'); rect(g, 97, 89, 18, 10, 'B'); rect(g, 100, 92, 4, 4, 'O'); return g; },     // the carrier
   '10011': () => { const g = airport(); rect(g, 96, 74, 10, 6, 'W'); rect(g, 97, 75, 8, 2, 'A'); return g; },      // the boarding pass
   '10010': () => { const g = airport(); clear(g, 86, 70, 7, 9); rect(g, 88, 70, 5, 9, 'Z'); return g; },           // the reusable cup, untouched
-  '10001': () => { const g = airport(); clear(g, 120, 46, 18, 34); rect(g, 118, 62, 24, 16, 'S'); rect(g, 140, 66, 12, 14, 'B'); rect(g, 142, 62, 8, 4, 'B'); return g; },  // one man, one bag
-  '10000': () => { const g = uzbek('c'); return g; },
+  '10001': () => { const g = airport(); clear(g, 120, 46, 18, 34); rect(g, 118, 62, 24, 16, 'S'); rect(g, 140, 66, 12, 14, 'B'); rect(g, 142, 62, 8, 4, 'B'); fgPerson(g, 22, 58, 'X', 'B'); rect(g, 34, 74, 3, 5, 'W'); rect(g, 39, 74, 3, 5, 'W'); return g; },  // one man, one bag, and Matt with two coffees
+  '10000': () => { const g = airport(); fgPerson(g, 22, 58, 'X', 'B'); rect(g, 34, 74, 3, 5, 'W'); rect(g, 39, 74, 3, 5, 'W'); return g; },  // the gate, and Matt anyway
   '01111': () => booking(false),
   '01110': () => shiftBand(booking(false), 60, 70, 1),
   '01101': () => { const g = apartment(false); const cat = catSide(0, 'sit'); for (let y = 0; y < 24; y++) for (let x = 0; x < 24; x++) { const ch = cat.d[y * 24 + x]; if (ch !== '.') px(g, 28 + x, 38 + y, ch); } return g; },

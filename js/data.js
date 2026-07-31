@@ -1198,10 +1198,12 @@ const ENDINGS = {
     'Four days later Zheng sends a photograph of a plate. Julius replies with a heart. That is the whole conversation and it is enough.'] },
   '10001': { title: 'NOTHING LEFT TO CARRY', tone: 'CALM', text: [
     'One bag. Fired, on a break, catless, and completely calm.',
+    'At the gate, unasked, holding two coffees: Matt. Nobody texted him the time. He knew the time.',
     'He has never felt lighter.',
     'Everyone who knows him finds this concerning, and he understands why, and it does not change anything.'] },
   '10000': { title: 'ONE-WAY TICKET', tone: 'BLEAK', text: [
     'Everything is gone except the money and the ticket.',
+    'Matt came to the airport anyway. He hands over the second coffee and says nothing at all.',
     'He is here. He wanted to be here.',
     'He is here.'] },
   '01111': { title: 'SO CLOSE', tone: 'GOOD', usesShortfall: true, text: [

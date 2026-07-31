@@ -35,11 +35,11 @@ MINIGAMES.CLEAN_UP = {
       ['ceiling', 'the ceiling. somehow.']][Math.min(7, cfg.day)];
     this.bg = cfg.bg || SPOT[0]; this.caption = SPOT[1];   // clean up where it landed, not somewhere else
     const n = 1 + (cfg.day >= 4 ? 1 : 0) + (cfg.day >= 7 ? 1 : 0);
-    this.dur = 9 + 10 * n;   // enough time for every puddle. it is tedious, not unfair.
+    this.dur = 9 + 8 * n;   // enough time, barely. it is tedious AND a little unfair now.
     this.puddles = [];
     for (let i = 0; i < n; i++) this.puddles.push({
       x: 30 + ((cfg.day * 37 + i * 61) % 122), y: MG_TOP + 40 + ((cfg.day * 53 + i * 47) % 74),
-      stage: 4, routed: false,
+      stage: 5, routed: false,
     });
     this.pi = 0;               // current puddle
     this.phase = 'towel';      // towel → wipe → route
@@ -47,9 +47,12 @@ MINIGAMES.CLEAN_UP = {
     this.leaveBtn = { x: 122, y: 292, w: 54, h: 24, label: 'LEAVE IT' };
     this.pickT = 0; this.left = false; this.wiped = 0; this.wrongBin = false;
     this.binToast = null; this.binToastT = 0; this.doneAfterToast = false;
-    this.bins = ['BIO', 'MIXED', 'PAPER', '?'].map((label, i) => ({
-      label, x: 6 + i * 43, y: 246, w: 41, h: 32,
-      color: ['G', 'S', 'P', 'M'][i],
+    // the bins change places every day. read them. muscle memory is not a virtue here.
+    const binDefs = [['BIO', 'G'], ['MIXED', 'S'], ['PAPER', 'P'], ['?', 'M']];
+    const rot = cfg.day % 4;
+    const shuffled = binDefs.slice(rot).concat(binDefs.slice(0, rot));
+    this.bins = shuffled.map(([label, color], i) => ({
+      label, color, x: 6 + i * 43, y: 246, w: 41, h: 32,
     }));
   },
   cur() { return this.puddles[this.pi]; },
