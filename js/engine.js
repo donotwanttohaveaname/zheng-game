@@ -17,7 +17,7 @@ function resetState() {
     friendsBase: 3, friendsDecay: 0, contactToday: false,   // v3.8: friendship decays without contact
     temp: 26, windowOpen: false, windowEverOpened: false, windowOpens: 0,
     fanTaps: 0, fanMain: null, booked: false, bookedPrice: null,
-    guilt: 0, overtime: 0, sold: [],
+    guilt: 0, overtime: 0, sold: [], mattSessions: 0,
     smell: 0, stains: [], mattBond: 0, juliusTrust: null,
     fanKinu: false, promised: false,
     sagaHeard: 0, tarotCount: 0, unread: 0, reviewWords: [],

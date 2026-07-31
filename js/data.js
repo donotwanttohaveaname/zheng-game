@@ -409,7 +409,7 @@ CHOICES.SYNC = {
 CHOICES.MATT_PLAY = {
   prompt: [],
   options: [
-    { label: 'One session', apply: () => {}, after: [{ t: 'game', id: 'CO_OP' }] },
+    { label: 'One session', apply: s => { s.mattSessions = (s.mattSessions || 0) + 1; }, after: [{ t: 'game', id: 'CO_OP' }] },
     { label: '"can\'t. work."', apply: s => { s.mattBond = Math.max(0, s.mattBond - 1); },
       after: [SAY('MATT', 'ok. tomorrow tho', 'disappointed'), N('It will not be tomorrow.')] },
   ],
@@ -1311,6 +1311,20 @@ function arrivalBeats(s) {
   const E = s.job >= 1, K = s.kinu >= 1, SA = s.sanity >= 1;
   const GIRLS = s.friends >= 4;   // Susan and Joy are on the plane. Julius never is.
   const b = [];
+  const MATT = (s.mattSessions || 0) >= 2 && !s.sold.includes('ps5');
+  if (MATT) {
+    b.push({ t: 'art', img: 'airport', music: null });
+    b.push(SFXB('S_SLACK_PING'));
+    b.push(SAY('MATT', 'gate 24 right? im at gate 24', 'delighted'));
+    b.push(Z('...'));
+    b.push(N('Matt is at gate 24. Nobody asked him to be at gate 24. He has taken two buses to stand in a place he has no ticket for.'));
+    b.push(SAY('MATT', "console's at yours. i'm not gonna touch it. i just wanted to say have a good one.", 'delighted'));
+    b.push(Z('You can touch it.'));
+    b.push(SAY('MATT', 'ok cool cool cool.'));
+    b.push({ t: 'pause', s: 1.5 });
+    b.push(N('They shake hands, which neither of them has ever done, and both of them immediately regret, and neither of them mentions.'));
+    b.push({ t: 'do', fn: st => bump('sanity', 1) });
+  }
   // ARRIVAL 1: THE DESCENT
   b.push({ t: 'art', img: 'plane', music: 'M_TITLE' });
   b.push(N('Two thousand kilometres of nothing. Then a river. Then a city that is mostly the colour of bread.'));
@@ -1413,6 +1427,17 @@ function arrivalBeats(s) {
 function codaBeats(s) {
   const K = s.kinu >= 1, SA = s.sanity >= 1;
   const b = [];
+  if ((s.mattSessions || 0) >= 2 && !s.sold.includes('ps5')) {
+    b.push(SFXB('S_DOORBELL'));
+    b.push({ t: 'art', img: 'apartment_hot', music: null });
+    b.push(SAY('MATT', 'heard you didnt go. brought crisps.', 'delighted'));
+    b.push(Z('...'));
+    b.push(SAY('MATT', 'not a pity thing. i wanted to play.'));
+    b.push(N('He does not ask about the money once. He is physically capable of not asking, which almost nobody is.'));
+    b.push(N('They play until two. Zheng is bad at it. Matt keeps choosing the level Zheng is least bad at, and says nothing about that either.'));
+    b.push({ t: 'do', fn: st => bump('sanity', 1) });
+    b.push({ t: 'pause', s: 1.5 });
+  }
   b.push({ t: 'do', fn: s => { s.tabPriceOverride = 1186; } });
   b.push({ t: 'art', img: 'tab', music: null });
   b.push(N('It is Monday.'));
