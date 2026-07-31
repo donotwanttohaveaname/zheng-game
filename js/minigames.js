@@ -967,13 +967,21 @@ const MG_AFTER = {
       N('Kinu, scruffed, dangling, entirely unbothered.'),
       N('She is not sorry. She has never been sorry. Sorry is not available to her.'),
     ];
-    s.kinu = 0;
+    s.kinu = 0; s.f.kinuLeft = true;   // she survives everything, always. that is canon.
     return [
       SFXB('S_KINU_GONE'),
       { t: 'hold', s: 1.5 },
+      N('She does not fall. She flies, briefly, and lands in the courtyard birch.'),
+      N('Then she discovers what every cat discovers up a tree: down is a theory.'),
       SFXB('S_SEAGULL'),
-      N('Three floors down, a woman in black opens her door before Kinu has finished knocking.'),
-      N('Kinu has made a decision.'),
+      N('From the third branch: meowing. Continuous. Outraged. At volume.'),
+      Z('Okay. Okay okay okay.', 'alarm'),
+      N('The fire department arrives in nine minutes. Two men, one ladder, no judgement. They have done this before.'),
+      N('Kinu descends in the arms of a fireman whose badge says VILLE. Purring. Famous.'),
+      N('Half the building watches from their windows. Anna watches from hers.'),
+      { t: 'hold', s: 1.5 },
+      N("When the truck leaves, Kinu walks to Anna's door, and sits, and does not look back."),
+      Z('He decides never to tell Joy about the name.'),
     ];
   },
 };
