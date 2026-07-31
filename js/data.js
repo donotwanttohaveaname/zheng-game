@@ -527,6 +527,7 @@ CHOICES.TEMU = {
       ] },
     { label: 'Buy the €39 Finnish hemp-composite one.', apply: s => { s.money -= 39; bump('love', 2); bump('sanity', -1); },
       after: [
+        { t: 'art', img: 'case_hemp' },
         SAY('JULIUS', 'This is SO much better.', 'warm'),
         N('It does not fit the camera hole. Every photograph taken this week has a dark corner in it. Including the good ones.'),
       ] },
@@ -649,7 +650,7 @@ DAYS[5] = [
     N('The window stays open the whole time, like an accusation.'),
     Z('Kinu. KINU.'),
     SFXB('S_DOORBELL'),
-    { t: 'art', img: 'anna' },
+    { t: 'art', img: 'anna_kinu' },
     SAY('ANNA', 'Yours, I believe.', 'neutral'),
     N("Kinu, in Anna's arms, purring like an engine that started without him."),
     SAY('ANNA', 'She knocked. Your cat knocks.'),
@@ -881,6 +882,7 @@ DAYS[6] = [
     SFXB('S_PACKAGE'),
     SAY('JULIUS', "There's a package?", 'curious'),
     Z('...', 'alarm'),
+    { t: 'art', img: 'case_temu' },
     N('Julius opens it. Slowly. The case is a cheerful cartoon cat.'),
     SAY('JULIUS', '...'),
     SAY('JULIUS', "It's really cute.", 'hurt'),
@@ -1112,6 +1114,7 @@ CHOICES.KINU7 = {
     { label: "Ask Anna to keep her for the week.", require: s => s.smell < 5, apply: s => { bump('sanity', 1); },
       after: [
         N('Anna says yes before he finishes the sentence. Anna has been waiting to be asked since March. Anna already has a bowl.'),
+        { t: 'art', img: 'anna_kinu' },
         N('The bowl has her name on it. Anna wrote the name.'),
         { t: 'if', cond: s => s.f.kinuWandered, then: [
           N('She has, after all, already stayed once. Briefly. Without permission.'),

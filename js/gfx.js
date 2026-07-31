@@ -122,6 +122,9 @@ function envCard(name) {
     case 'kitchen': g = kitchen(); break;
     case 'bar': g = bar(); break;
     case 'anna': g = annaFlat(); break;
+    case 'anna_kinu': g = annaFlat(true); break;
+    case 'case_temu': g = phoneCase('temu'); break;
+    case 'case_hemp': g = phoneCase('hemp'); break;
     case 'vet': g = vet(); break;
     case 'booking_on': g = booking(true); break;
     case 'booking_off': g = booking(false); break;
